@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "nueramic_math"
+name = "nueramic_mathml"
 version = "0.0.0"
 description = "Math algorithms in ML on torch"
 authors = [
@@ -18,6 +18,8 @@ classifiers = [
 packages = [
     { include = "nueramic_mathml", from = "src" }
 ]
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/nueramic/mathml/issues"
 
 [tool.poetry.dependencies]
 python = "^3.10"
