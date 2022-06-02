@@ -1,3 +1,30 @@
+[tool.poetry]
+name = "nueramic_math"
+version = "0.0.0"
+description = "Math algorithms in ML on torch"
+authors = [
+    "Victor Barbarich <vktrbr@icloud.com>",
+    "Adelina Tsoi <dlnxxts@gmail.com>"
+]
+license = "MIT"
+readme = "README.md"
+
+repository = "https://github.com/nueramic/mathml"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+packages = [
+    { include = "nueramic_mathml", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+torch = "^1.11.0"
+
+[tool.poetry.dev-dependencies]
+
 [build-system]
-requires = ["setuptools>=42"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
