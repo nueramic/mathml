@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nueramic_mathml"
-version = "0.0.0"
+version = "0.0.0.1"
 description = "Math algorithms in ML on torch"
 authors = [
     "Victor Barbarich <vktrbr@icloud.com>",
@@ -18,14 +18,17 @@ classifiers = [
 packages = [
     { include = "nueramic_mathml", from = "src" }
 ]
+
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/nueramic/mathml/issues"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.8"
 torch = "^1.11.0"
+numpy = "^1.22.4"
 
 [tool.poetry.dev-dependencies]
+pytest = "^7.1.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
