@@ -1,20 +1,17 @@
-import unittest
+import pytest
+
 from src.nueramic_mathml.calculus import *
 
-test_functions = {
-    'test_1': {
-        'x0': torch.tensor([1., 2.]),
-        'func': lambda x: (x ** 2).sum(),
-        'answer': torch.tensor([2., 4.])
-    }
-}
+test_functions = [
+    (lambda x: (x ** 2).sum(), torch.tensor([1., 2.]), torch.tensor([2., 4.])),
+    (lambda x: 1, torch.tensor([0., 0.]), torch.tensor([0., 0.])),
+    (lambda x: torch.sin(x[0] * x[1]), torch.tensor([torch.pi / 2, 2]), torch.tensor([-2., -torch.pi / 2])),
+    (lambda x: x.sum(), torch.tensor([5] * 1000), torch.tensor([1] * 1000)),
+    (lambda x: (x ** 2).sum(), torch.arange(1, 1000), torch.arange(1, 1000) * 2),
+    (lambda x: x.prod(), torch.arange(1, 10), torch.arange(1, 10).prod() / torch.arange(1, 10))
+]
 
 
-class CalculusFunctionsTest(unittest.TestCase):
-    def test_gradient(self):
-        for test in test_functions:
-            self.assertTrue(torch.allclose(gradient()))
-
-
-if __name__ == '__main__':
-    unittest.main()
+@pytest.mark.parametrize('function, x0, expected', test_functions)
+def test_gradient(function, x0, expected):
+    assert torch.allclose(gradient(function, x0.double()), expected.double(), atol=1e-6, rtol=1e-4)
