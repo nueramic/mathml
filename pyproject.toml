@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nueramic_mathml"
-version = "0.0.0.1"
+version = "0.0.0.2"
 description = "Math algorithms in ML on torch"
 authors = [
     "Victor Barbarich <vktrbr@icloud.com>",
@@ -32,6 +32,8 @@ pytest = "^7.1.2"
 Sphinx = "^5.0.1"
 furo = "^2022.6.4"
 sphinxcontrib-pseudocode = "^0.7.0"
+sphinxcontrib-katex = "^0.8.6"
+sphinx-copybutton = "^0.5.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
