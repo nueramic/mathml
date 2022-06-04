@@ -15,22 +15,20 @@ def golden_section_search(function: Callable[[float, Any], float],
     """
     Returns the optimal point and history using the Golden Section search [1]_
 
-    :math:`\\rule{11cm}{0.7pt}`
-    :math:`\\textbf{Constant: } \\displaystyle \\varphi = \\frac{(1 + \\sqrt{5})}{2}`
-
+    :math:`\\rule{11cm}{0.7pt} \\\\`
+    :math:`\\textbf{Constant: } \\displaystyle \\varphi = \\frac{(1 + \\sqrt{5})}{2} \\\\`
     :math:`\\textbf{Input: } f(x) - \\text{ function }; a, b - \\text{ left and right bounds };
-    \\varepsilon - \\text{ precision }`
-    :math:`\\rule{11cm}{0.3pt}`
-
+    \\varepsilon - \\text{ precision } \\\\`
+    :math:`\\rule{11cm}{0.3pt}\\\\`
     :math:`\\text{while } |a - b| > \\varepsilon: \\\\`
     :math:`\\qquad \\displaystyle x_1 = b - \\frac{b - a}{\\varphi} \\\\`
     :math:`\\qquad \\displaystyle x_2 = a + \\frac{b - a}{\\varphi} \\\\`
     :math:`\\qquad \\text{if }  f(x_1) > f(x_2): \\\\`
     :math:`\\qquad \\qquad a = x_1 \\\\`
     :math:`\\qquad \\text{else}: \\\\`
-    :math:`\\qquad \\qquad b = x_2`
+    :math:`\\qquad \\qquad b = x_2 \\\\`
 
-    :math:`\\rule{11cm}{0.7pt}`
+    :math:`\\rule{11cm}{0.7pt} \\\\`
 
     .. note::
         If optimization fails golden_section_search will return the last point
