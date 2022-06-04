@@ -1,7 +1,6 @@
 # Simple common math functions for show examples
 # Gradient, Hessian, Jacobian
-# Radial basis functions
-# Logistic function
+
 from __future__ import annotations
 import torch
 from typing import Callable, Sequence
@@ -9,7 +8,7 @@ from typing import Callable, Sequence
 
 def gradient(function: Callable[[torch.Tensor], float], x0: torch.Tensor, delta_x: float = 1e-4) -> torch.Tensor:
     """
-    Returns the gradient of the function at a specific point x0
+    Returns the gradient of the function at a specific point :math:`x_0`.
     A two-point finite difference formula that approximates the derivative
 
     .. math::
@@ -24,13 +23,15 @@ def gradient(function: Callable[[torch.Tensor], float], x0: torch.Tensor, delta_
          \\frac{\\partial f}{\\partial x_2}
          \\enspace \\dots \\enspace \\frac{\\partial f}{\\partial x_n}\\right]^\\top
 
+    Example
         >>> gradient(lambda x: (x ** 2).sum(), torch.tensor([1., 2.])).round()  # f(x, y)  = x ** 2 + y ** 2
             tensor([2., 4.], dtype=torch.float64)
 
     :param function: function which depends on n variables from x
-    :param x0: n x 1 - dimensional array :math:`\\in R^{n}`. dtype is torch.double (float64)
+    :param x0: n x 1 - dimensional array :math:`\\in \\mathbb{R}^{n}`. dtype is torch.double (float64)
     :param delta_x: precision of two-point formula above (delta_x = h)
     :return: vector of partial derivatives
+
     .. note::
         If we make delta_x :math:`\\leq` 1e-4 hessian returns matrix with large error rate
 
@@ -77,10 +78,10 @@ def jacobian(f_vector: Sequence[Callable[[torch.Tensor], float]],
 
 def hessian(function: Callable[[torch.Tensor], float], x0: torch.Tensor, delta_x: float = 1e-4) -> torch.Tensor:
     """
-    Returns a hessian of function at point x0
+    Returns a hessian of function at point :math:`x_0`
 
         >>> def paraboloid(x): return x[0] ** 2 + 2 * x[1] ** 2
-        >>> print(hessian(paraboloid, [1, 1]).round())
+        >>> print(hessian(paraboloid, torch.tensor([1, 1])).round())
         [[2. 0.]
          [0. 4.]]
 
