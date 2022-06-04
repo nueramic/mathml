@@ -13,22 +13,31 @@ def golden_section_search(function: Callable[[float, Any], float],
                           keep_history: bool = False,
                           **kwargs) -> Tuple[float, HistoryGSS]:
     """
-    Golden-section search [1]_.
+    Returns the optimal point and history using the Golden Section search [1]_
 
-    **Algorithm:**
-        :math:`\\displaystyle \\varphi = \\frac{(1 + \\sqrt{5})}{2}`
+    :math:`\\rule{11cm}{0.7pt}`
+    :math:`\\textbf{Constant: } \\displaystyle \\varphi = \\frac{(1 + \\sqrt{5})}{2}`
 
-        1. :math:`a, b` - left and right bounds
-        2. | :math:`\\displaystyle x_1 = b - \\frac{b - a}{\\varphi}`
-           | :math:`\\displaystyle x_2 = a + \\frac{b - a}{\\varphi}`
-        3. | if :math:`\\displaystyle f(x_1) > f(x_2)` (for min)
-                :math:`\\displaystyle [ f(x_1) < f(x_2)` (for max) :math:`]`
-           | then :math:`a = x_1` else  :math:`b = x_2`
-        4. Repeat  :math:`2, 3` steps while :math:`|a - b| > e`
+    :math:`\\textbf{Input: } f(x) - \\text{ function }; a, b - \\text{ left and right bounds };
+    \\varepsilon - \\text{ precision }`
+    :math:`\\rule{11cm}{0.3pt}`
 
-    **If optimization fails golden_section_search will return the last point**
+    :math:`\\text{while } |a - b| > \\varepsilon: \\\\`
+    :math:`\\qquad \\displaystyle x_1 = b - \\frac{b - a}{\\varphi} \\\\`
+    :math:`\\qquad \\displaystyle x_2 = a + \\frac{b - a}{\\varphi} \\\\`
+    :math:`\\qquad \\text{if }  f(x_1) > f(x_2): \\\\`
+    :math:`\\qquad \\qquad a = x_1 \\\\`
+    :math:`\\qquad \\text{else}: \\\\`
+    :math:`\\qquad \\qquad b = x_2`
 
-    Code example::
+    :math:`\\rule{11cm}{0.7pt}`
+
+    .. note::
+        If optimization fails golden_section_search will return the last point
+
+    Code example:
+
+    .. code-block:: python3
 
         >>> def func(x): return 2.71828 ** (3 * x) + 5 * 2.71828 ** (-2 * x)
         >>> point, data = golden_section_search(func, (-10, 10), type_optimization='min', keep_history=True)
@@ -67,8 +76,8 @@ def golden_section_search(function: Callable[[float, Any], float],
         history: HistoryGSS = {'iteration': [], 'middle_point': [], 'f_value': [], 'left_point': [], 'right_point': []}
 
     if verbose:
-        print(f'Iteration: {0} \t|\t point = {(a + b) / 2 :0.3f} '
-              f'\t|\t f(point) = {function((a + b) / 2, **kwargs): 0.3f}')
+        print(f'Iteration: {0} \\t|\\t point = {(a + b) / 2 :0.3f} '
+              f'\\t|\\t f(point) = {function((a + b) / 2, **kwargs): 0.3f}')
 
     try:
         for i in range(1, max_iter):
@@ -88,8 +97,8 @@ def golden_section_search(function: Callable[[float, Any], float],
 
             middle_point: float = (a + b) / 2
             if verbose:
-                print(f'Iteration: {i} \t|\t point = {middle_point :0.3f} '
-                      f'\t|\t f(point) = {function(middle_point, **kwargs): 0.3f}')
+                print(f'Iteration: {i} \\t|\\t point = {middle_point :0.3f} '
+                      f'\\t|\\t f(point) = {function(middle_point, **kwargs): 0.3f}')
 
             if keep_history:
                 history['iteration'].append(i)

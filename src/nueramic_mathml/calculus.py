@@ -33,7 +33,7 @@ def gradient(function: Callable[[torch.Tensor], float], x0: torch.Tensor, delta_
     :return: vector of partial derivatives
 
     .. note::
-        If we make delta_x :math:`\\leq` 1e-4 hessian returns matrix with large error rate
+        If we make delta_x :math:`\\leq` 1e-4 gradient will return values with large error rate
 
     """
     assert isinstance(x0, torch.Tensor), 'x0 must be torch.Tensor'
