@@ -2,8 +2,10 @@
 # Gradient, Hessian, Jacobian
 
 from __future__ import annotations
-import torch
+
 from typing import Callable, Sequence
+
+import torch
 
 
 def gradient(function: Callable[[torch.Tensor], float], x0: torch.Tensor, delta_x: float = 1e-4) -> torch.Tensor:
