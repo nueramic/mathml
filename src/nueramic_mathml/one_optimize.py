@@ -1,4 +1,4 @@
-# One dimensional optimization algorithms
+# One dimensional optimization algorithms for function optimization
 from __future__ import annotations
 
 from typing import Tuple, Any, Callable, Literal
