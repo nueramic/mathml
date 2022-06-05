@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from src.nueramic_mathml.calculus import gradient, jacobian, hessian
+from src.nueramic_mathml import gradient, jacobian, hessian
 
 # Tests Gradient
 test_functions_grad = [
