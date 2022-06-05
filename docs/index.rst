@@ -21,8 +21,8 @@ some interesting features, for example, regression on stock prices or viewing gr
    :caption: Contents
 
    modules/calculus.rst
-   modules/optimize.rst
-
+   modules/one_optimize.rst
+   modules/multi_optimize.rst
 
 Indices and Tables
 ==================
