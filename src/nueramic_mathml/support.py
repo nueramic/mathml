@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import sys
 from typing import List, TypedDict, Text, Tuple, Sequence, Any, Literal
 
 
@@ -66,3 +68,20 @@ def update_history_brent(history: HistoryBrent, values: Sequence[Any]) -> Histor
         history[name].append(values[i])
 
     return history
+
+
+class HiddenPrints:
+    """
+    Object hides print. Working with context manager "with"::
+
+        >>> with HiddenPrints():
+        >>>     print("It won't be printed")
+    """
+
+    def __enter__(self):
+        self._original_stdout = sys.stdout
+        sys.stdout = open(os.devnull, 'w')
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout.close()
+        sys.stdout = self._original_stdout
