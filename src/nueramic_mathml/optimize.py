@@ -20,6 +20,7 @@ def golden_section_search(function: Callable[[float, Any], float],
     :math:`\\textbf{Input: } f(x) - \\text{ function }; a, b - \\text{ left and right bounds };
     \\varepsilon - \\text{ precision } \\\\`
     :math:`\\rule{11cm}{0.3pt}\\\\`
+
     :math:`\\text{while } |a - b| > \\varepsilon: \\\\`
     :math:`\\qquad \\displaystyle x_1 = b - \\frac{b - a}{\\varphi} \\\\`
     :math:`\\qquad \\displaystyle x_2 = a + \\frac{b - a}{\\varphi} \\\\`
@@ -27,7 +28,6 @@ def golden_section_search(function: Callable[[float, Any], float],
     :math:`\\qquad \\qquad a = x_1 \\\\`
     :math:`\\qquad \\text{else}: \\\\`
     :math:`\\qquad \\qquad b = x_2 \\\\`
-
     :math:`\\rule{11cm}{0.7pt} \\\\`
 
     .. note::
