@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import List, TypedDict, Text, Tuple
+
+from typing import List, TypedDict, Text, Tuple, Sequence, Any, Literal
 
 
 class HistoryGSS(TypedDict):
@@ -47,3 +48,21 @@ class HistoryBFGS(TypedDict):
     iteration: List[float]
     point: List[Tuple]
     function: List[float]
+
+
+def update_history_brent(history: HistoryBrent, values: Sequence[Any]) -> HistoryBrent:
+    """
+    Updates brent history
+    :param history: HistoryBrent object in which the update is required
+    :param values: Sequence with values: 'iteration', 'f_least', 'f_middle', 'f_largest',  'x_least',
+                                         'x_middle', 'x_largest', 'left_bound', 'right_bound', 'type_step'
+    :return: updated HistoryBrent
+    """
+    name: Literal['iteration', 'f_least', 'f_middle', 'f_largest', 'x_least', 'x_middle',
+                  'x_largest', 'left_bound', 'right_bound', 'type_step']
+
+    for i, name in enumerate(['iteration', 'f_least', 'f_middle', 'f_largest', 'x_least', 'x_middle',
+                              'x_largest', 'left_bound', 'right_bound', 'type_step']):
+        history[name].append(values[i])
+
+    return history
