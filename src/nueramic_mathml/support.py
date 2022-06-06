@@ -85,3 +85,28 @@ class HiddenPrints:
     def __exit__(self, exc_type, exc_val, exc_tb):
         sys.stdout.close()
         sys.stdout = self._original_stdout
+
+
+class HistoryGD(TypedDict):
+    """
+    Class with an optimization history of gradient descent methods
+    """
+    iteration: List[int]
+    f_value: List[float]
+    f_grad_norm: List[float]
+    x: List[Sequence]
+    message: Text
+
+
+def update_history_gd(history: HistoryGD, values: List) -> HistoryGD:
+    """
+    Update HistoryMDO with values, which contains iteration, f_value, f_grad_norm, x as a list
+
+    :param history: object of HistoryMDO
+    :param values: new values that need to append in history in order iteration, f_value, f_grad_norm, x
+    :return: updated history
+    """
+    key: Literal['iteration', 'f_value', 'f_grad_norm', 'x']
+    for i, key in enumerate(['iteration', 'f_value', 'f_grad_norm', 'x']):
+        history[key].append(values[i])
+    return history
