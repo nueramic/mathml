@@ -30,6 +30,8 @@ def golden_section_search(function: Callable[[float, Any], float],
     :math:`\\qquad \\qquad a = x_1 \\\\`
     :math:`\\qquad \\text{else}: \\\\`
     :math:`\\qquad \\qquad b = x_2 \\\\`
+    :math:`\\rule{125mm}{0.3pt}\\\\`
+    :math:`\\textbf{Return: } \\displaystyle \\frac{a+b}{2} \\\\`
     :math:`\\rule{125mm}{0.7pt} \\\\`
 
     .. note::
@@ -133,17 +135,33 @@ def successive_parabolic_interpolation(function: Callable[[float, Any], float],
     """
     Returns the optimal point and history using the Successive parabolic interpolation algorithm [3]_
 
-    **Algorithm:**
-        1. Set :math:`x_0, x_2, x_1` and calculate :math:`f_0 = f(x_0), f_1 = f(x_1), f_2 = f(x_2)`
-        2. Arrange :math:`x_0, x_1, x_2` so that :math:`f_2 \\leq f_1 \\leq f_0`
-        3. Calculate :math:`x_{i + 1}` with the formula below
-        4. Repeat step 2-3 until then :math:`|x_{i+1}-x_{i}| \\geq e` or :math:`|f(x_{i+1})-f(x_{i})| \\geq e`
+    :math:`\\rule{125mm}{0.7pt} \\\\`
 
     .. math::
+        :label: eq1
 
-        x_{i+1}=x_{i}+ \\frac{1}{2}\\left[\\frac{\\left(x_{i-1}-x_{i}\\right)^{2}\\left(f_{i}-f_{i-2}\\right)+
+        \\displaystyle x_{i+1}=x_{i}+ \\frac{1}{2}\\left[\\frac{\\left(x_{i-1}-x_{i}\\right)^{2}
+        \\left(f_{i}-f_{i-2}\\right)+
         \\left(x_{i-2}-x_{i}\\right)^{2}\\left(f_{i-1}-f_{i}\\right)}{\\left(x_{i-1}-x_{i}\\right)
-        \\left(f_{i}-f_{i-2}\\right)+\\left(x_{i-2}-x_{i}\\right)\\left(f_{i-1}-f_{i}\\right)}\\right]
+        \\left(f_{i}-f_{i-2}\\right)+\\left(x_{i-2}-x_{i}\\right)\\left(f_{i-1}-f_{i}\\right)}\\right]\\\\
+
+
+    :math:`\\rule{125mm}{0.3pt}\\\\`
+
+    :math:`\\textbf{Input: } f(x) - \\text{ function}; a, b - \\text{ left and right bounds};
+    \\varepsilon - \\text{ precision } \\\\`
+    :math:`\\rule{125mm}{0.3pt}\\\\`
+
+    :math:`\\displaystyle x_0 = a, \\ f_0 = f(x_0); \\qquad  x_1 = b, \\ f_1 = f(x_1); \\qquad x_2 = \\displaystyle
+    \\frac{a+b}{2}, \\ f_2 = f(x_2)\\\\`
+    :math:`\\text{while } |x_{i+1}-x_{i}| \\geq \\varepsilon` or :math:`|f(x_{i+1})-f(x_{i})| \\geq \\varepsilon:\\\\`
+    :math:`\\qquad \\displaystyle x_0, x_1, x_2` so that :math:`f_2 \\leq f_1 \\leq f_0\\\\`
+    :math:`\\qquad \\displaystyle \\text{Calculate } x_{i + 1} \\text{with the formula }`  :eq:`eq1` :math:`\\\\`
+
+    :math:`\\rule{125mm}{0.3pt}\\\\`
+    :math:`\\textbf{Return: } \\displaystyle x_{i+1} \\\\`
+    :math:`\\rule{125mm}{0.7pt} \\\\`
+
 
     Example:
         >>> def func1(x): return x ** 3 - x ** 2 - x
@@ -276,6 +294,32 @@ def brent(function: Callable[[float, Any], float],
           **kwargs) -> Tuple[float, HistoryBrent]:
     """
     Returns the optimal point and history using the Brent's algorithm [1]_.
+
+    :math:`\\rule{125mm}{0.7pt} \\\\`
+    :math:`\\textbf{Input: } f(x) - \\text{ function }; a, b - \\text{ left and right bounds };
+    \\varepsilon - \\text{ precision } \\\\`
+    :math:`\\rule{125mm}{0.3pt}\\\\`
+
+    :math:`\\displaystyle \\varphi = \\frac{(1 + \\sqrt{5})}{2} \\\\`
+    :math:`\\displaystyle x_{least} = a + \\varphi \\cdot (b - a) \\\\`
+    :math:`\\displaystyle x_{new} = x_{least} \\\\`
+    :math:`\\displaystyle tolerance = \\varepsilon \\cdot | x_{least}| + 10^{-9} \\\\`
+
+    :math:`\\text{while }\\displaystyle |x_{least} - \\frac{a+b}{2}| > 2 \\cdot tolerance - \\frac{b-a}{2} :\\\\`
+
+    :math:`\\qquad  \\text{if }\\displaystyle |x_{new} - x_{least}| > tolerance:\\\\`
+    :math:`\\qquad \\qquad \\text{calculate parabolic } remainder \\text{ by formula }` :eq:`eq1` :math:`\\\\`
+    :math:`\\qquad \\text{if } \\displaystyle remainder < previous \\ remainder \\ \\& \\
+    x_{least} + remainder \\in (a, b):\\\\`
+    :math:`\qquad \\qquad  \\text{use  ``paraboloic" } \\displaystyle remainder\\\\`
+    :math:`\\qquad \\text{else:}\\\\`
+    :math:`\\qquad \\qquad \\text{make  ``golden"  } \\displaystyle remainder\\\\`
+    :math:`\\qquad \\qquad \\text{use ``golden" } \\displaystyle remainder\\\\`
+    :math:`\\qquad \\displaystyle x_{new} = x_{least} + remainder\\\\`
+
+    :math:`\\rule{125mm}{0.3pt}\\\\`
+    :math:`\\textbf{Return: } \\displaystyle x_{least} \\\\`
+    :math:`\\rule{125mm}{0.7pt} \\\\`
 
     .. rubric:: References
 

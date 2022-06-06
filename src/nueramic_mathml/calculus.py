@@ -59,11 +59,17 @@ def jacobian(f_vector: Sequence[Callable[[torch.Tensor], float]],
     """
     Returns the Jacobian matrix of a sequence of m functions from f_vector by n variables from x.
 
-        >>> func_3 = [lambda x: x[0] ** 2 + x[1], lambda x: 2 * x[0] + 5 * x[1], lambda x: x[0] * x[1]]
-        >>> print(jacobian(func_3, torch.tensor([-1, 2])).round())
-        tensor([[-2.,  1.],
-                [ 2.,  5.],
-                [ 2., -1.]], dtype=torch.float64)
+    .. math::
+        {\\displaystyle \\mathbf {J} ={\\begin{bmatrix}{\\dfrac {\\partial f_{1}}{\\partial x_{1}}}&\\cdots
+          &{\\dfrac {\\partial f_{1}}{\\partial x_{n}}}\\\\\\vdots &\\ddots &\\vdots \\\\{\\dfrac {\\partial f_{m}}{\\partial x_{1}}}
+          &\\cdots &{\\dfrac {\\partial f_{m}}{\\partial x_{n}}}\\end{bmatrix}}}_{m \\times n}
+
+
+    >>> func_3 = [lambda x: x[0] ** 2 + x[1], lambda x: 2 * x[0] + 5 * x[1], lambda x: x[0] * x[1]]
+    >>> print(jacobian(func_3, torch.tensor([-1, 2])).round())
+    tensor([[-2.,  1.],
+            [ 2.,  5.],
+            [ 2., -1.]], dtype=torch.float64)
 
     :param f_vector: a flat sequence, list or tuple or other containing m functions
     :param x0: an n-dimensional array. The specific point at which we will calculate the Jacobian
@@ -82,10 +88,24 @@ def hessian(function: Callable[[torch.Tensor], float], x0: torch.Tensor, delta_x
     """
     Returns a hessian of function at point :math:`x_0`
 
-        >>> def paraboloid(x): return x[0] ** 2 + 2 * x[1] ** 2
-        >>> print(hessian(paraboloid, torch.tensor([1, 1])).round())
-        [[2. 0.]
-         [0. 4.]]
+
+    .. math::
+        \\ H(f) = \\begin{bmatrix} \\displaystyle
+        \\frac{\\partial^2 f}{\\partial x_1^2} & \\displaystyle \\frac{\\partial^2 f}{\\partial x_1\\,\\partial x_2} &
+        \\cdots & \\displaystyle \\frac{\\partial^2 f}{\\partial x_1\\,\\partial x_n} \\\\  \\
+        \\displaystyle \\frac{\\partial^2 f}{\\partial x_2\\,\\partial x_1} & \\displaystyle \\frac{\\partial^2 f}
+        {\\partial x_2^2} & \\cdots & \\displaystyle \\frac{\\partial^2 f}{\\partial x_2\\,\\partial x_n} \\\\  \\
+        \\vdots & \\vdots & \\ddots & \\vdots \\\\  \\
+        \\displaystyle \\frac{\\partial^2 f}{\\partial x_n\\,\\partial x_1} & \\displaystyle \\frac{\\partial^2 f}
+        {\\partial x_n\\,\\partial x_2} & \\cdots & \\displaystyle \\frac{\\partial^2 f}{\\partial x_n^2}
+        \\end{bmatrix}\\\\
+
+
+
+    >>> def paraboloid(x): return x[0] ** 2 + 2 * x[1] ** 2
+    >>> print(hessian(paraboloid, torch.tensor([1, 1])).round())
+    [[2. 0.]
+     [0. 4.]]
 
     :param function: function which depends on n variables from x
     :param x0: n - dimensional array
