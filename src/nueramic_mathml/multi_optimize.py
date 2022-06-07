@@ -361,9 +361,92 @@ def gd_optimal_step(function: Callable[[torch.Tensor], float],
                       f'f(point) = {round(func_k, round_precision)}')
 
             # comparing of norm 2 with optimization accuracy
-            if sum(grad_k ** 2) ** 0.5 < float(epsilon):
+            if (grad_k ** 2).sum() ** 0.5 < float(epsilon):
                 history['message'] = 'Optimization terminated successfully. code 0'
                 break
+
+        else:
+            history['message'] = 'Optimization terminated. Max steps. code 1'
+
+    except Exception as e:
+        history['message'] = f'Optimization failed. {e}. code 2'
+
+    return x_k, history
+
+
+def nonlinear_cgm(function: Callable[[torch.Tensor], float],
+                  x0: torch.Tensor,
+                  epsilon: float = 1e-5,
+                  max_iter: int = 500,
+                  verbose: bool = False,
+                  keep_history: bool = False) -> Tuple[torch.Tensor, HistoryGD]:
+    """
+    Paragraph 2.4.1 page 6
+    Algorithm works when the function is approximately quadratic near the minimum, which is the case when the
+    function is twice differentiable at the minimum and the second derivative is non-singular there.
+
+
+    Code example::
+        >>> def func(x): return 10 * x[0] ** 2 + x[1] ** 2 / 5
+        >>> x_0 = torch.tensor([1, 2])
+        >>> solution = nonlinear_cgm(func, x_0)
+        >>> print(solution[0])
+        {'point': array([-1.70693616e-07,  2.90227591e-06]), 'f_value': 1.9760041961386155e-12}
+
+    :param function: callable that depends on the first positional argument
+    :param x0: numpy ndarray which is initial approximation
+    :param epsilon: optimization accuracy
+    :param max_iter: maximum number of iterations
+    :param verbose: flag of printing iteration logs
+    :param keep_history: flag of return history
+    :return: tuple with point and history.
+
+    """
+    x_k = torch.tensor(x0, dtype=torch.float64)
+    grad_k = gradient(function, x_k)
+    p_k = grad_k
+    func_k = function(x_k)
+    round_precision = -int(numpy.log10(epsilon))
+    if keep_history:
+        history: HistoryGD = {
+            'iteration': [0],
+            'f_value': [func_k],
+            'f_grad_norm': [sum(grad_k ** 2) ** 0.5],
+            'x': [x_k]
+        }
+    else:
+        history: HistoryGD = {'iteration': [], 'f_value': [], 'x': [], 'f_grad_norm': []}
+
+    if verbose:
+        print(f'Iteration: {0} \t|\t '
+              f'point = {numpy.round(x_k, round_precision)} \t|\t '
+              f'f(point) = {round(func_k, round_precision)}')
+
+    try:
+        for i in range(max_iter - 1):
+
+            if (grad_k ** 2).sum() ** 0.5 < epsilon:
+                history['message'] = 'Optimization terminated successfully. code 0'
+                break
+            else:
+                with HiddenPrints():
+                    gamma = brent(lambda gam: function(x_k - gam * p_k), (0, 1))[0]
+
+                x_k = x_k - gamma * p_k
+                grad_k_new = gradient(function, x_k)
+                beta_fr = (grad_k_new @ grad_k_new.reshape(-1, 1)) / (grad_k @ grad_k.reshape(-1, 1))
+                p_k = grad_k_new + beta_fr * p_k
+                grad_k = grad_k_new
+                func_k = function(x_k)
+
+            if keep_history:
+                history = update_history_gd(history, values=[i + 1, func_k, sum(grad_k ** 2) ** 0.5, x_k])
+
+            if verbose:
+                func_k = function(x_k)
+                print(f'Iteration: {i + 1} \t|\t '
+                      f'point = {torch.round(x_k, decimals=round_precision)} \t|\t '
+                      f'f(point) = {round(func_k, round_precision)}')
 
         else:
             history['message'] = 'Optimization terminated. Max steps. code 1'
