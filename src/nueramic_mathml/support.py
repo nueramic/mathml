@@ -4,6 +4,8 @@ import os
 import sys
 from typing import List, TypedDict, Text, Tuple, Sequence, Any, Literal
 
+import torch
+
 
 class HistoryGSS(TypedDict):
     """
@@ -91,9 +93,9 @@ class HistoryGD(TypedDict):
     """
     Class with an optimization history of gradient descent methods
     """
-    iteration: List[int]
-    f_value: List[float]
-    f_grad_norm: List[float]
+    iteration: List
+    f_value: List
+    f_grad_norm: List
     x: List[Sequence]
     message: Text
 
@@ -110,3 +112,24 @@ def update_history_gd(history: HistoryGD, values: List) -> HistoryGD:
     for i, key in enumerate(['iteration', 'f_value', 'f_grad_norm', 'x']):
         history[key].append(values[i])
     return history
+
+
+def print_verbose(x_k: torch.Tensor,
+                  func_k: torch.Tensor | float,
+                  verbose: bool,
+                  iteration: int,
+                  round_precision: int) -> None:
+    """
+    Prints iteration verbose
+
+    :param x_k: specific point
+    :param func_k: float or 0-d tensor
+    :param verbose: flag of print verbose
+    :param iteration: number of iteration
+    :param round_precision: precision of printing float numbers
+    :return: none
+    """
+    if verbose:
+        print(f'Iteration: {iteration} \t|\t '
+              f'point = {torch.round(x_k, decimals=round_precision)} \t|\t '
+              f'f(point) = {round(func_k, round_precision)}')
