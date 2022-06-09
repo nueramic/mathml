@@ -60,9 +60,10 @@ def jacobian(f_vector: Sequence[Callable[[torch.Tensor], torch.Tensor]],
     Returns the Jacobian matrix of a sequence of m functions from f_vector by n variables from x.
 
     .. math::
-        {\\displaystyle \\mathbf {J} ={\\begin{bmatrix}{\\dfrac {\\partial f_{1}}{\\partial x_{1}}}&\\cdots
-          &{\\dfrac {\\partial f_{1}}{\\partial x_{n}}}\\\\\\vdots &\\ddots &\\vdots \\\\{\\dfrac {\\partial f_{m}}
-          {\\partial x_{1}}}&\\cdots &{\\dfrac {\\partial f_{m}}{\\partial x_{n}}}\\end{bmatrix}}}_{m \\times n}
+
+        {\\displaystyle J ={\\begin{bmatrix}{\\dfrac {\\partial f_{1}}{\\partial x_{1}}}&\\cdots
+          &{\\dfrac {\\partial f_{1}}{\\partial x_{n}}}\\\\\\vdots &\\ddots &\\vdots \\\\{\\dfrac {\\partial f_{m}}{\\partial x_{1}}}
+          &\\cdots &{\\dfrac {\\partial f_{m}}{\\partial x_{n}}}\\end{bmatrix}}}_{m \\times n}
 
 
     >>> func_3 = [lambda x: x[0] ** 2 + x[1], lambda x: 2 * x[0] + 5 * x[1], lambda x: x[0] * x[1]]
