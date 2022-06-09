@@ -132,4 +132,5 @@ def print_verbose(x_k: torch.Tensor,
     if verbose:
         print(f'Iteration: {iteration} \t|\t '
               f'point = {torch.round(x_k, decimals=round_precision)} \t|\t '
-              f'f(point) = {round(func_k, round_precision)}')
+              f'f(point) = {torch.round(func_k, decimals=round_precision)}'
+              if isinstance(func_k, torch.Tensor) else f'{round(func_k, round_precision)}')
