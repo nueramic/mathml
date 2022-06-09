@@ -8,7 +8,7 @@ from typing import Callable, Sequence
 import torch
 
 
-def gradient(function: Callable[[torch.Tensor], float], x0: torch.Tensor, delta_x: float = 1e-4) -> torch.Tensor:
+def gradient(function: Callable[[torch.Tensor], torch.Tensor], x0: torch.Tensor, delta_x: float = 1e-4) -> torch.Tensor:
     """
     Returns the gradient of the function at a specific point :math:`x_0`.
     A two-point finite difference formula that approximates the derivative
@@ -53,13 +53,14 @@ def gradient(function: Callable[[torch.Tensor], float], x0: torch.Tensor, delta_
     return grad
 
 
-def jacobian(f_vector: Sequence[Callable[[torch.Tensor], float]],
+def jacobian(f_vector: Sequence[Callable[[torch.Tensor], torch.Tensor]],
              x0: torch.Tensor,
              delta_x: float = 1e-4) -> torch.Tensor:
     """
     Returns the Jacobian matrix of a sequence of m functions from f_vector by n variables from x.
 
     .. math::
+
         {\\displaystyle J ={\\begin{bmatrix}{\\dfrac {\\partial f_{1}}{\\partial x_{1}}}&\\cdots
           &{\\dfrac {\\partial f_{1}}{\\partial x_{n}}}\\\\\\vdots &\\ddots &\\vdots \\\\{\\dfrac {\\partial f_{m}}{\\partial x_{1}}}
           &\\cdots &{\\dfrac {\\partial f_{m}}{\\partial x_{n}}}\\end{bmatrix}}}_{m \\times n}
@@ -84,7 +85,7 @@ def jacobian(f_vector: Sequence[Callable[[torch.Tensor], float]],
     return jac
 
 
-def hessian(function: Callable[[torch.Tensor], float], x0: torch.Tensor, delta_x: float = 1e-4) -> torch.Tensor:
+def hessian(function: Callable[[torch.Tensor], torch.Tensor], x0: torch.Tensor, delta_x: float = 1e-4) -> torch.Tensor:
     """
     Returns a hessian of function at point :math:`x_0`
 
@@ -124,7 +125,7 @@ def hessian(function: Callable[[torch.Tensor], float], x0: torch.Tensor, delta_x
         delta_i = torch.zeros_like(x0, dtype=torch.float64)
         delta_i[i] += delta_x
 
-        def partial_i(x: torch.Tensor) -> float:
+        def partial_i(x: torch.Tensor) -> torch.Tensor:
             return (function(x + delta_i) - function(x - delta_i)) / (2 * delta_x)
 
         hes[i, :] = gradient(partial_i, x0, delta_x)
