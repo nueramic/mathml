@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from src.nueramic_mathml import bfgs, gd_constant, gd_frac, gd_optimal, nonlinear_cgm, primal_dual_interior
+from src.nueramic_mathml import *
 
 test_functions = [  # func, [a, b], true_point
     (lambda x: (x ** 2).sum(), torch.tensor([-2]), torch.tensor([0]), 'parabola'),
@@ -65,3 +65,8 @@ test_functions_ineq_constr = [
 @pytest.mark.parametrize('function, x0, inequalities, expected', test_functions_ineq_constr)
 def test_primal_dual(function, x0, inequalities, expected):
     assert primal_dual_interior(function, x0, inequalities)[0] == pytest.approx(expected, abs=1e-1)
+
+
+@pytest.mark.parametrize('function, x0, inequalities, expected', test_functions_ineq_constr)
+def test_log_barrier_solver(function, x0, inequalities, expected):
+    assert log_barrier_solver(function, x0, inequalities)[0] == pytest.approx(expected, abs=1e-1)

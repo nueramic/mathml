@@ -1,6 +1,6 @@
 import torch
 
-from src.nueramic_mathml import gd_constant, gd_frac, gd_optimal, bfgs, primal_dual_interior
+from src.nueramic_mathml import *
 
 test = {
     'function': lambda x: (3 * x[0] ** 2 + 0.5 * x[1] ** 2),
@@ -38,3 +38,4 @@ if __name__ == '__main__':
     print(gd_frac(**test)[1])
     print(gd_optimal(**test)[1])
     print(primal_dual_interior(*test_functions_ineq_constr[3], keep_history=True))
+    print(log_barrier_solver(*test_functions_ineq_constr[3], keep_history=True))
