@@ -453,7 +453,7 @@ def log_barrier_function(function: Callable[[torch.Tensor], torch.Tensor],
         elif const_function > 1e-8:
             output_lb -= mu * torch.log(const_function)
         else:
-            output_lb += 10**10
+            output_lb += 10 ** 10
 
     return output_lb
 
@@ -495,7 +495,7 @@ def primal_dual_interior(function: Callable[[torch.Tensor], torch.Tensor],
         """ log barrier function -- main function. therefore, instead of a function, we use lb_function """
         return log_barrier_function(function, x, _mu, inequality_constraints)
 
-    x_k, func_k, grad_k, history, round_precision = initialize(lb_function, x0, epsilon, keep_history)
+    x_k, func_k, grad_k, history, round_precision = initialize(function, x0, epsilon, keep_history)
     m = len(inequality_constraints)  # Amount of inequality constraints
     n = x_k.shape[0]  # Amount of variables
     p = torch.ones(m + n)  # init of p
@@ -509,10 +509,6 @@ def primal_dual_interior(function: Callable[[torch.Tensor], torch.Tensor],
 
     except ArithmeticError:
         history['message'] = 'Point out of domain'
-        return x_k, history
-
-    except torch.linalg.LinAlgError as e:
-        history['message'] = f'Optimization failed. Determinant of function hessian is zero. torch: {e}. code 2.'
         return x_k, history
 
     # first verbose
@@ -567,6 +563,75 @@ def primal_dual_interior(function: Callable[[torch.Tensor], torch.Tensor],
 
         else:
             history['message'] = 'Optimization terminated. Max steps. code 1'
+
+    except Exception as e:
+        history['message'] = f'Optimization failed. {e}. code 2'
+
+    return x_k, history
+
+
+def log_barrier_solver(function: Callable[[torch.Tensor], torch.Tensor],
+                       x0: torch.Tensor,
+                       inequality_constraints: Sequence[Callable[[torch.Tensor], torch.Tensor]],
+                       epsilon: float = 1e-5,
+                       max_iter: int = 1000,
+                       keep_history: bool = False,
+                       verbose: bool = False) -> Tuple[torch.Tensor, HistoryGD]:
+    """
+    Returns optimal point of optimization with inequality constraints by Log Barrier method.
+    Nocedal, J., &amp; Wright, S. J. (2006). 19.6 THE PRIMAL LOG-BARRIER METHOD.
+    In Numerical optimization (pp. 583–584). essay, Springer.
+
+    Example for :math:`f(x, y) = (x + 0.5)^2 + (y - 0.5)^2, \\quad 0 \\le x \\le 1, 0 \\le y \\le 1`
+
+        >>> log_barrier_solver(lambda x: (x[0] + 0.5) ** 2 + (x[1] - 0.5) ** 2, torch.tensor([0.9, 0.1]),
+        >>>                    [lambda x: x[0], lambda x: 1 - x[0], lambda x: x[1], lambda x: 1 - x[1]])
+        After calculation: x, y = 0.0031, 0.5
+
+    :param function:
+    :param x0:
+    :param epsilon:
+    :param inequality_constraints:
+    :param max_iter:
+    :param keep_history:
+    :param verbose:
+    :return:
+    """
+    m = len(inequality_constraints)  # Amount of inequality constraints
+    x_k, func_k, grad_k, history, round_precision = initialize(function, x0, epsilon, keep_history)
+
+    try:
+        function(x0)
+        for i in range(m):
+            if inequality_constraints[i](x0) < 0:
+                raise ArithmeticError
+
+    except ArithmeticError:
+        history['message'] = 'Point out of domain'
+        return x_k, history
+
+    tau = 1  # The tau sequence will be geometric
+
+    try:
+        for i in range(max_iter):
+            mu_k = tau ** 0.5
+            x_k, history_step = gd_frac(lambda x: log_barrier_function(function, x, mu_k, inequality_constraints),
+                                        x_k, gamma=mu_k, epsilon=tau, keep_history=True, max_iter=5)
+
+            tau *= 0.9
+            if tau <= epsilon:
+                break
+
+            # verbose
+            if verbose or keep_history:
+                func_k = function(x_k)
+                grad_k = gradient(function, x_k)
+
+            print_verbose(x_k, func_k, verbose, i + 1, round_precision)
+
+            # history
+            if keep_history:
+                history = update_history_gd(history, values=[i + 1, func_k, grad_k.norm(2), x_k.clone()])
 
     except Exception as e:
         history['message'] = f'Optimization failed. {e}. code 2'
