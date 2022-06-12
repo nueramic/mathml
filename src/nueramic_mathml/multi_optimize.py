@@ -661,7 +661,7 @@ def constrained_lagrangian_solver(function: Callable[[float | torch.Tensor], tor
                                   constraints: Sequence[Callable[[float | torch.Tensor], torch.Tensor]],
                                   x_bounds: Sequence[Tuple[float, float]] | None | torch.Tensor = None,
                                   epsilon: float = 1e-4,
-                                  max_iter: int = 1000,
+                                  max_iter: int = 250,
                                   keep_history: bool = False,
                                   verbose: bool = False) -> Tuple[torch.Tensor, HistoryGD]:
     """
@@ -671,7 +671,7 @@ def constrained_lagrangian_solver(function: Callable[[float | torch.Tensor], tor
 
     Example for :math:`f(x, y) = (x + 0.5)^2 + (y - 0.5)^2, \\quad x = 1`
 
-        >>> constrained_lagrangian_solver(lambda x: (x[0] + 0.5) ** 2 + (x[1] - 0.5) ** 2, [0.1, 0.1],
+        >>> constrained_lagrangian_solver(lambda x: (x[0] + 0.5) ** 2 + (x[1] - 0.5) ** 2, torch.tensor([0.1, 0.1]),
         >>>                                     [lambda x: x[0] - 1]))
         After calculation: x, y = 0.99, 0.49
 
@@ -687,9 +687,9 @@ def constrained_lagrangian_solver(function: Callable[[float | torch.Tensor], tor
     """
     m = len(constraints)
     if x_bounds is None:
-        x_bounds = []
+        x_bounds = torch.zeros(len(x0), 2).double()
         for i in range(len(x0)):
-            x_bounds.append((-torch.inf, torch.inf))
+            x_bounds[i, :] = torch.tensor([-torch.inf, torch.inf])
 
     elif isinstance(x0, torch.Tensor):
         assert x0.shape[0] == x_bounds.shape[0], 'the boundaries should be n x 2 tensor'
@@ -698,6 +698,13 @@ def constrained_lagrangian_solver(function: Callable[[float | torch.Tensor], tor
 
     else:
         assert len(x_bounds) == x0.shape[0], 'the boundaries should be for each variable'
+
+    if not isinstance(x0, torch.Tensor):
+
+        _x_bounds = torch.zeros(x0.shape[0], 2).double()
+        for i, const in enumerate(x_bounds):
+            _x_bounds[i, :] = const
+        x_bounds = _x_bounds
 
     def c(x: torch.Tensor) -> torch.Tensor:
         """Returns vector of constraints at specific x"""
@@ -719,17 +726,21 @@ def constrained_lagrangian_solver(function: Callable[[float | torch.Tensor], tor
 
         return output
 
-    def p_function(g: torch.Tensor, u_l_bounds: Sequence[Tuple[float, float]]):
+    def p_function(g: torch.Tensor, u_l_bounds: torch.Tensor):
         """
         P(g, l, u) is the projection of the vector g :math:`\\in` IRn onto the rectangular box :math:`[l, u]`
         Nocedal, J., &amp; Wright, S. J. (2006). Numerical optimization (p. 520)
         """
 
-        for j in range(len(g)):
-            if g[j] >= u_l_bounds[j][1]:
-                g[j] = u_l_bounds[j][1]
-            elif g[j] <= u_l_bounds[j][0]:
-                g[j] = u_l_bounds[j][0]
+        # for j in range(len(g)):
+        #     if g[j] >= u_l_bounds[j][1]:
+        #         g[j] = u_l_bounds[j][1]
+        #     elif g[j] <= u_l_bounds[j][0]:
+        #         g[j] = u_l_bounds[j][0]
+
+        # replaced by
+
+        g = torch.minimum(torch.maximum(g, u_l_bounds[:, 0]), u_l_bounds[:, 1])
 
         return g
 
@@ -744,7 +755,7 @@ def constrained_lagrangian_solver(function: Callable[[float | torch.Tensor], tor
         history['message'] = 'Point out of domain'
         return x_k, history
 
-    lambdas_k = torch.tile(abs(x0[0]), dims=(m,))
+    lambdas_k = torch.rand(m)
     eta = epsilon  # Main tolerance for constraints
     omega = eta  # Main tolerance for lagrange function
     mu_k = 10
@@ -758,8 +769,7 @@ def constrained_lagrangian_solver(function: Callable[[float | torch.Tensor], tor
             p = p_function(grad_lagrangian, x_bounds)
             return (x - p).norm(2)
 
-        x_k = gd_frac(local_min_function, x_k, epsilon=omega_k,
-                      max_iter=3, keep_history=True)[0]
+        x_k = nonlinear_cgm(local_min_function, x_k, epsilon=omega_k, max_iter=4)[0]
 
         if verbose or keep_history:
             func_k = function(x_k)
@@ -779,9 +789,7 @@ def constrained_lagrangian_solver(function: Callable[[float | torch.Tensor], tor
 
             # update multipliers, tighten tolerances
             lambdas_k = lambdas_k - mu_k * c_k
-            mu_k = mu_k
-            eta_k = 1 / mu_k ** 0.1
-            omega = 1 / mu_k
+
         else:
             # increase penalty parameter, tighten tolerances
             lambdas_k = lambdas_k - mu_k * c_k
