@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import List, TypedDict, Text, Tuple, Sequence, Any, Literal
+from typing import List, Text, Tuple, Sequence, Any
+
+if sys.version_info >= (3, 8):
+    from typing import TypedDict, Literal  # pylint: disable=no-name-in-module
+else:
+    from typing_extensions import TypedDict, Literal
 
 import torch
 
@@ -129,8 +134,8 @@ def print_verbose(x_k: torch.Tensor,
     :param round_precision: precision of printing float numbers
     :return: none
     """
+    round_precision = min(round_precision, 4)
     if verbose:
-        print(f'Iteration: {iteration} \t|\t '
-              f'point = {torch.round(x_k, decimals=round_precision)} \t|\t '
-              f'f(point) = {torch.round(func_k, decimals=round_precision)}'
-              if isinstance(func_k, torch.Tensor) else f'{round(func_k, round_precision)}')
+        print(f'iteration: {iteration:4d}  |  '
+              f'x = [{", ".join(map(lambda x: f"{round(float(x), round_precision):>10.4f}", x_k))}]  |  '
+              f'f(x) = {round(float(func_k), round_precision)}')
