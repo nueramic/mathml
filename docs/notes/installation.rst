@@ -10,7 +10,7 @@ Installation via Pip
         $ python -c "import torch; print(torch.__version__)"
         1.11.0
 
-#. The package requires python version 3.8 or later
+#. The package requires python version 3.7 or later
     .. code-block:: console
 
         $ python --version
