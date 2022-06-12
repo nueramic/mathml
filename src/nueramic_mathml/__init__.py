@@ -1,7 +1,7 @@
 from .calculus import hessian, jacobian, gradient
 from .one_optimize import golden_section_search, successive_parabolic_interpolation, brent
 from .support import HistoryBFGS, HistorySPI, HistoryGSS, HistoryBrent, HiddenPrints
-from .multi_optimize import bfgs, gd_constant_step, gd_frac_step, gd_optimal_step, nonlinear_cgm
+from .multi_optimize import bfgs, gd_constant, gd_frac, gd_optimal, nonlinear_cgm, primal_dual_interior
 
 __all__ = [
     "hessian",
@@ -12,8 +12,9 @@ __all__ = [
     "brent",
     "bfgs",
     "HiddenPrints",
-    "gd_constant_step",
-    "gd_frac_step",
-    "gd_optimal_step",
-    "nonlinear_cgm"
+    "gd_constant",
+    "gd_frac",
+    "gd_optimal",
+    "nonlinear_cgm",
+    "primal_dual_interior"
 ]
