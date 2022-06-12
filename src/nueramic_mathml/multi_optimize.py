@@ -90,7 +90,7 @@ def bfgs(function: Callable[[torch.Tensor], torch.Tensor],
 
             # stop criterion
             if (grad_k ** 2).sum() ** 0.5 < tolerance:
-                print('Searching finished. Successfully. code 0')
+                history['message'] = 'Searching finished. Successfully. code 0'
                 return x_k.reshape(-1), history
 
             p_k = -h_k @ grad_k
@@ -114,11 +114,11 @@ def bfgs(function: Callable[[torch.Tensor], torch.Tensor],
 
             # check divergence
             if torch.isnan(x_k).any():
-                print(f'The method has diverged. code 2')
+                history['message'] = f'The method has diverged. code 2'
                 return x_k.flatten(), history
 
             # verbose
-            print_verbose(x_k, func_k, verbose, i + 1, round_precision)
+            print_verbose(x_k.flatten(), func_k, verbose, i + 1, round_precision)
 
             # history
             if keep_history:
@@ -127,7 +127,7 @@ def bfgs(function: Callable[[torch.Tensor], torch.Tensor],
     except Exception as e:
         history['message'] = f'Optimization failed. {e}. code 2'
 
-    print('Searching finished. Max iterations have been reached. code 1')
+    history['message'] = 'Searching finished. Max iterations have been reached. code 1'
     return x_k.flatten(), history
 
 
@@ -353,6 +353,7 @@ def gd_optimal(function: Callable[[torch.Tensor], torch.Tensor],
 
             x_k = x_k - gamma * grad_k
             grad_k = gradient(function, x_k)
+            func_k = function(x_k)
 
             # verbose
             print_verbose(x_k, func_k, verbose, i + 1, round_precision)
