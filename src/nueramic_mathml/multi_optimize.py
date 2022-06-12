@@ -53,14 +53,19 @@ def bfgs(function: Callable[[torch.Tensor], torch.Tensor],
          verbose: bool = False,
          keep_history: bool = False) -> Tuple[torch.Tensor, HistoryBFGS]:
     """
-    [СЮДА ОФОРМИТЬ РЕФЕРЕНС] Returns a tensor n x 1 with optimal point using the BFGS method.
+    Returns a tensor n x 1 with optimal point using the BFGS method [1]_
+
     Broyden–Fletcher–Goldfarb–Shanno algorithm
     The algorithm does not use Wolfe conditions. Instead of wolfe, alg uses the optimal step.
 
     .. note::
         The algorithm only works for a flat x0, and the functions should depend on a flat array
 
-    Wright and Nocedal, 'Numerical Optimization', 1999; pp.136-140 BFGS algorithm.
+    .. rubric:: References
+
+    ..  [1] Wright and Nocedal, 'Numerical Optimization', 1999; pp.136-140 BFGS algorithm.
+
+    :math:`\\rule{125mm}{0.2pt} \\\\`
 
     :param function: callable that depends on the first positional argument. Other arguments are passed through kwargs
     :param x0: start minimization point
@@ -153,13 +158,18 @@ def gd_constant(function: Callable[[torch.Tensor], torch.Tensor],
                 verbose: bool = False,
                 keep_history: bool = False) -> Tuple[torch.Tensor, HistoryGD]:
     """
-    Algorithm with constant step. Documentation: paragraph 2.2.2, page 3.
+    Algorithm with constant step.
     The gradient of the function shows us the direction of increasing the function.
-    The idea is to move in the opposite direction to x_{i + 1} where f(x_{i + 1}) < f(x_{i}).
-    But, if we add a gradient to x_{i} without changes, our method will often diverge.
-    So we need to add a gradient with some weight gamma.
+    The idea is to move in the opposite direction to :math:`\\displaystyle x_{k + 1} \\text{ where }
+    f(x_{k + 1}) < f(x_{k}) \\text{ .}`
 
-    Code example::
+    But, if we add a gradient to :math:`\\displaystyle x_{k}` without changes, our method will often diverge.
+    So we need to add a gradient with some weight :math:`\\displaystyle \\gamma \\text{ .}\\\\`
+
+    Code example
+
+    .. code-block:: python3
+
         >>> def func(x): return x[0] ** 2 + x[1] ** 2
         >>> x_0 = torch.tensor([1, 2])
         >>> solution = gd_constant(func, x_0)
@@ -220,10 +230,13 @@ def gd_frac(function: Callable[[torch.Tensor], torch.Tensor],
             verbose: bool = False,
             keep_history: bool = False) -> Tuple[torch.Tensor, HistoryGD]:
     """
-    Algorithm with fractional step. Documentation: paragraph 2.2.3, page 4
-    Requirements: 0 < lambda0 < 1 is the step multiplier, 0 < delta < 1.
+    Algorithm with fractional step.
 
-    Code example::
+    Requirements: :math:`\\ 0 < \\lambda_0 < 1 \\text{is the step multiplier, } 0 < \\delta < 1`.
+
+    Code example
+
+    .. code-block:: python3
 
         >>> def func(x): return x[0] ** 2 + x[1] ** 2
         >>> x_0 = torch.tensor([1, 2])
@@ -295,10 +308,12 @@ def gd_optimal(function: Callable[[torch.Tensor], torch.Tensor],
                verbose: bool = False,
                keep_history: bool = False) -> Tuple[torch.Tensor, HistoryGD]:
     """
-    Algorithm with optimal step. Documentation: paragraph 2.2.4, page 5
-    The idea is to choose a gamma that minimizes the function in the direction f'(x_k)
+    Algorithm with optimal step.
+    The idea is to choose a gamma that minimizes the function in the direction :math:`\\ f'(x_k)`
 
-    Code example::
+    Code example
+
+    .. code-block:: python3
 
         >>> def func(x): return -torch.exp(- x[0] ** 2 - x[1] ** 2)
         >>> x_0 = torch.tensor([1, 2])
@@ -362,12 +377,14 @@ def nonlinear_cgm(function: Callable[[torch.Tensor], torch.Tensor],
                   verbose: bool = False,
                   keep_history: bool = False) -> Tuple[torch.Tensor, HistoryGD]:
     """
-    Paragraph 2.4.1 page 6
     Algorithm works when the function is approximately quadratic near the minimum, which is the case when the
     function is twice differentiable at the minimum and the second derivative is non-singular there.
 
 
-    Code example::
+    Code example
+
+    .. code-block:: python3
+
         >>> def func(x): return 10 * x[0] ** 2 + x[1] ** 2 / 5
         >>> x_0 = torch.tensor([1, 2])
         >>> solution = nonlinear_cgm(func, x_0)
