@@ -311,7 +311,7 @@ def brent(function: Callable[[float, Any], float],
     :math:`\\qquad \\qquad \\text{calculate parabolic } remainder \\text{ by formula }` :eq:`eq1` :math:`\\\\`
     :math:`\\qquad \\text{if } \\displaystyle remainder < previous \\ remainder \\ \\& \\
     x_{least} + remainder \\in (a, b):\\\\`
-    :math:`\qquad \\qquad  \\text{use  ``paraboloic" } \\displaystyle remainder\\\\`
+    :math:`\\qquad \\qquad  \\text{use  ``paraboloic" } \\displaystyle remainder\\\\`
     :math:`\\qquad \\text{else:}\\\\`
     :math:`\\qquad \\qquad \\text{make  ``golden"  } \\displaystyle remainder\\\\`
     :math:`\\qquad \\qquad \\text{use ``golden" } \\displaystyle remainder\\\\`
