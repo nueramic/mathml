@@ -1,19 +1,20 @@
 # One dimensional optimization algorithms for function optimization
 from __future__ import annotations
 
-from typing import Tuple, Any, Callable, Literal
+from typing import Tuple, Callable, Literal
+
+import torch
 
 from .support import HistoryGSS, HistorySPI, HistoryBrent, update_history_brent
 
 
-def golden_section_search(function: Callable[[float, Any], float],
+def golden_section_search(function: Callable[[float | torch.Tensor], float],
                           bounds: Tuple[float, float],
                           epsilon: float = 1e-5,
                           type_optimization: Literal['min', 'max'] = 'min',
                           max_iter: int = 500,
                           verbose: bool = False,
-                          keep_history: bool = False,
-                          **kwargs) -> Tuple[float, HistoryGSS]:
+                          keep_history: bool = False) -> Tuple[float | torch.Tensor, HistoryGSS]:
     """
     Returns the optimal point and history using the Golden Section search [2]_
 
@@ -72,7 +73,7 @@ def golden_section_search(function: Callable[[float, Any], float],
     if keep_history:
         history: HistoryGSS = {'iteration': [0],
                                'middle_point': [(a + b) / 2],
-                               'f_value': [function((a + b) / 2, **kwargs)],
+                               'f_value': [function((a + b) / 2)],
                                'left_point': [a],
                                'right_point': [b]}
 
@@ -81,7 +82,7 @@ def golden_section_search(function: Callable[[float, Any], float],
 
     if verbose:
         print(f'Iteration: {0} \\t|\\t point = {(a + b) / 2 :0.3f} '
-              f'\\t|\\t f(point) = {function((a + b) / 2, **kwargs): 0.3f}')
+              f'\\t|\\t f(point) = {function((a + b) / 2): 0.3f}')
 
     try:
         for i in range(1, max_iter):
@@ -89,12 +90,12 @@ def golden_section_search(function: Callable[[float, Any], float],
             x2: float = a + (b - a) / phi
 
             if type_optimization == 'min':
-                if function(x1, **kwargs) > function(x2, **kwargs):
+                if function(x1) > function(x2):
                     a = x1
                 else:
                     b = x2
             else:
-                if function(x1, **kwargs) < function(x2, **kwargs):
+                if function(x1) < function(x2):
                     a = x1
                 else:
                     b = x2
@@ -102,12 +103,12 @@ def golden_section_search(function: Callable[[float, Any], float],
             middle_point: float = (a + b) / 2
             if verbose:
                 print(f'Iteration: {i} \\t|\\t point = {middle_point :0.3f} '
-                      f'\\t|\\t f(point) = {function(middle_point, **kwargs): 0.3f}')
+                      f'\\t|\\t f(point) = {function(middle_point): 0.3f}')
 
             if keep_history:
                 history['iteration'].append(i)
                 history['middle_point'].append(middle_point)
-                history['f_value'].append(function(middle_point, **kwargs))
+                history['f_value'].append(function(middle_point))
                 history['left_point'].append(a)
                 history['right_point'].append(b)
 
@@ -124,14 +125,13 @@ def golden_section_search(function: Callable[[float, Any], float],
         raise e
 
 
-def successive_parabolic_interpolation(function: Callable[[float, Any], float],
+def successive_parabolic_interpolation(function: Callable[[float | torch.Tensor], float],
                                        bounds: Tuple[float, float],
                                        epsilon: float = 1e-5,
                                        type_optimization: Literal['min', 'max'] = 'min',
                                        max_iter: int = 500,
                                        verbose: bool = False,
-                                       keep_history: bool = False,
-                                       **kwargs) -> Tuple[float, HistorySPI]:
+                                       keep_history: bool = False) -> Tuple[float | torch.Tensor, HistorySPI]:
     """
     Returns the optimal point and history using the Successive parabolic interpolation algorithm [3]_
 
@@ -208,9 +208,9 @@ def successive_parabolic_interpolation(function: Callable[[float, Any], float],
     history: HistorySPI = {'iteration': [], 'f_value': [], 'x0': [], 'x1': [], 'x2': []}
     x0, x1 = bounds[0], bounds[1]
     x2 = (x0 + x1) / 2
-    f0 = type_opt_const * function(x0, **kwargs)
-    f1 = type_opt_const * function(x1, **kwargs)
-    f2 = type_opt_const * function(x2, **kwargs)
+    f0 = type_opt_const * function(x0)
+    f1 = type_opt_const * function(x1)
+    f2 = type_opt_const * function(x2)
     f_x: dict = {x0: f0, x1: f1, x2: f2}
     x2, x1, x0 = sorted([x0, x1, x2], key=lambda x: f_x[x])
 
@@ -243,7 +243,7 @@ def successive_parabolic_interpolation(function: Callable[[float, Any], float],
                 print('Searching finished. Out of bounds. code 1')
                 return x2, history
 
-            f_new = type_opt_const * function(x_new, **kwargs)
+            f_new = type_opt_const * function(x_new)
             f_x[x_new] = f_new
             previous_xs = [x0, x1, x2]
 
@@ -284,14 +284,13 @@ def successive_parabolic_interpolation(function: Callable[[float, Any], float],
         raise e
 
 
-def brent(function: Callable[[float, Any], float],
+def brent(function: Callable[[float | torch.Tensor], float],
           bounds: Tuple[float, float],
           epsilon: float = 1e-5,
           type_optimization: Literal['min', 'max'] = 'min',
           max_iter: int = 500,
           verbose: bool = False,
-          keep_history: bool = False,
-          **kwargs) -> Tuple[float, HistoryBrent]:
+          keep_history: bool = False) -> Tuple[float | torch.Tensor, HistoryBrent]:
     """
     Returns the optimal point and history using the Brent's algorithm [1]_.
 
@@ -311,7 +310,9 @@ def brent(function: Callable[[float, Any], float],
     :math:`\\qquad \\qquad \\text{calculate parabolic } remainder \\text{ by formula }` :eq:`eq1` :math:`\\\\`
     :math:`\\qquad \\text{if } \\displaystyle remainder < previous \\ remainder \\ \\& \\
     x_{least} + remainder \\in (a, b):\\\\`
+
     :math:`\\qquad \\qquad  \\text{use  ``paraboloic" } \\displaystyle remainder\\\\`
+
     :math:`\\qquad \\text{else:}\\\\`
     :math:`\\qquad \\qquad \\text{make  ``golden"  } \\displaystyle remainder\\\\`
     :math:`\\qquad \\qquad \\text{use ``golden" } \\displaystyle remainder\\\\`
@@ -335,8 +336,6 @@ def brent(function: Callable[[float, Any], float],
     :param max_iter: maximum number of iterations
     :param verbose: flag of printing iteration logs
     :param keep_history: flag of return history
-    :var gold_const: b - (b - a) / phi = a + (b - a) * gold_const
-    :var type_opt_const: This value unifies the optimization for each type of min and max
     :return: tuple with point and history.
 
     """
@@ -355,8 +354,8 @@ def brent(function: Callable[[float, Any], float],
     # initial values
     a, b = sorted(bounds)
     x_largest = x_middle = x_least = a + gold_const * (b - a)
-    f_largest = f_middle = f_least = type_opt_const * function(x_least, **kwargs)
-    x_least: float
+    f_largest = f_middle = f_least = type_opt_const * function(x_least)
+    x_least: float | torch.Tensor
 
     history: HistoryBrent = {
         'iteration': [],
@@ -440,7 +439,7 @@ def brent(function: Callable[[float, Any], float],
             else:
                 x_new = x_least - tolerance
 
-            f_new = type_opt_const * function(x_new, **kwargs)
+            f_new = type_opt_const * function(x_new)
 
             # Update a, b, x_largest, x_middle, x_leas
             if f_new <= f_least:
