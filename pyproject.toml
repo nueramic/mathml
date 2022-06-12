@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nueramic_mathml"
-version = "0.0.1.1"
+version = "0.0.1.3"
 description = "Math algorithms in ML on torch"
 authors = [
     "Victor Barbarich <vktrbr@icloud.com>",
@@ -23,7 +23,7 @@ packages = [
 "Bug Tracker" = "https://github.com/nueramic/mathml/issues"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.7,<3.11"
 torch = "^1.11.0"
 numpy = "^1.22.4"
 
