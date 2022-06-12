@@ -1,8 +1,13 @@
 # One dimensional optimization algorithms for function optimization
 from __future__ import annotations
 
-from typing import Tuple, Callable, Literal
+import sys
+from typing import Tuple, Callable
 
+if sys.version_info >= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
 import torch
 
 from .support import HistoryGSS, HistorySPI, HistoryBrent, update_history_brent
