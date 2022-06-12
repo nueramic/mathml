@@ -470,7 +470,7 @@ def log_barrier_function(function: Callable[[torch.Tensor], torch.Tensor],
         elif const_function > 1e-8:
             output_lb -= mu * torch.log(const_function)
         else:
-            output_lb += 10**10
+            output_lb += 10 ** 10
 
     return output_lb
 
@@ -512,7 +512,7 @@ def primal_dual_interior(function: Callable[[torch.Tensor], torch.Tensor],
         """ log barrier function -- main function. therefore, instead of a function, we use lb_function """
         return log_barrier_function(function, x, _mu, inequality_constraints)
 
-    x_k, func_k, grad_k, history, round_precision = initialize(lb_function, x0, epsilon, keep_history)
+    x_k, func_k, grad_k, history, round_precision = initialize(function, x0, epsilon, keep_history)
     m = len(inequality_constraints)  # Amount of inequality constraints
     n = x_k.shape[0]  # Amount of variables
     p = torch.ones(m + n)  # init of p
@@ -526,10 +526,6 @@ def primal_dual_interior(function: Callable[[torch.Tensor], torch.Tensor],
 
     except ArithmeticError:
         history['message'] = 'Point out of domain'
-        return x_k, history
-
-    except torch.linalg.LinAlgError as e:
-        history['message'] = f'Optimization failed. Determinant of function hessian is zero. torch: {e}. code 2.'
         return x_k, history
 
     # first verbose
@@ -587,5 +583,210 @@ def primal_dual_interior(function: Callable[[torch.Tensor], torch.Tensor],
 
     except Exception as e:
         history['message'] = f'Optimization failed. {e}. code 2'
+
+    return x_k, history
+
+
+def log_barrier_solver(function: Callable[[torch.Tensor], torch.Tensor],
+                       x0: torch.Tensor,
+                       inequality_constraints: Sequence[Callable[[torch.Tensor], torch.Tensor]],
+                       epsilon: float = 1e-5,
+                       max_iter: int = 1000,
+                       keep_history: bool = False,
+                       verbose: bool = False) -> Tuple[torch.Tensor, HistoryGD]:
+    """
+    Returns optimal point of optimization with inequality constraints by Log Barrier method.
+    Nocedal, J., &amp; Wright, S. J. (2006). 19.6 THE PRIMAL LOG-BARRIER METHOD.
+    In Numerical optimization (pp. 583–584). essay, Springer.
+
+    Example for :math:`f(x, y) = (x + 0.5)^2 + (y - 0.5)^2, \\quad 0 \\le x \\le 1, 0 \\le y \\le 1`
+
+        >>> log_barrier_solver(lambda x: (x[0] + 0.5) ** 2 + (x[1] - 0.5) ** 2, torch.tensor([0.9, 0.1]),
+        >>>                    [lambda x: x[0], lambda x: 1 - x[0], lambda x: x[1], lambda x: 1 - x[1]])
+        After calculation: x, y = 0.0031, 0.5
+
+    :param function:
+    :param x0:
+    :param epsilon:
+    :param inequality_constraints:
+    :param max_iter:
+    :param keep_history:
+    :param verbose:
+    :return:
+    """
+    m = len(inequality_constraints)  # Amount of inequality constraints
+    x_k, func_k, grad_k, history, round_precision = initialize(function, x0, epsilon, keep_history)
+
+    try:
+        function(x0)
+        for i in range(m):
+            if inequality_constraints[i](x0) < 0:
+                raise ArithmeticError
+
+    except ArithmeticError:
+        history['message'] = 'Point out of domain'
+        return x_k, history
+
+    tau = 1  # The tau sequence will be geometric
+
+    try:
+        for i in range(max_iter):
+            mu_k = tau ** 0.5
+            x_k, history_step = gd_frac(lambda x: log_barrier_function(function, x, mu_k, inequality_constraints),
+                                        x_k, gamma=mu_k, epsilon=tau, keep_history=True, max_iter=5)
+
+            tau *= 0.9
+            if tau <= epsilon:
+                break
+
+            # verbose
+            if verbose or keep_history:
+                func_k = function(x_k)
+                grad_k = gradient(function, x_k)
+
+            print_verbose(x_k, func_k, verbose, i + 1, round_precision)
+
+            # history
+            if keep_history:
+                history = update_history_gd(history, values=[i + 1, func_k, grad_k.norm(2), x_k.clone()])
+
+    except Exception as e:
+        history['message'] = f'Optimization failed. {e}. code 2'
+
+    return x_k, history
+
+
+def constrained_lagrangian_solver(function: Callable[[float | torch.Tensor], torch.Tensor],
+                                  x0: torch.Tensor,
+                                  constraints: Sequence[Callable[[float | torch.Tensor], torch.Tensor]],
+                                  x_bounds: Sequence[Tuple[float, float]] | None | torch.Tensor = None,
+                                  epsilon: float = 1e-4,
+                                  max_iter: int = 1000,
+                                  keep_history: bool = False,
+                                  verbose: bool = False) -> Tuple[torch.Tensor, HistoryGD]:
+    """
+    Returns solution of minimization by newton_eq_const. Alias of <<Newton’s method under equality constrains>>
+    Nocedal, J., &amp; Wright, S. J. (2006). 17.4 PRACTICAL AUGMENTED LAGRANGIAN METHODS.
+    In Numerical optimization (pp. 519–521). essay, Springer.
+
+    Example for :math:`f(x, y) = (x + 0.5)^2 + (y - 0.5)^2, \\quad x = 1`
+
+        >>> constrained_lagrangian_solver(lambda x: (x[0] + 0.5) ** 2 + (x[1] - 0.5) ** 2, [0.1, 0.1],
+        >>>                                     [lambda x: x[0] - 1]))
+        After calculation: x, y = 0.99, 0.49
+
+    :param function:
+    :param x0:
+    :param constraints: list of equality constraints
+    :param x_bounds: bounds on x. e.g. 0 <= x[i] <= 1, then x_bounds[i] = (0, 1)
+    :param epsilon:
+    :param max_iter:
+    :param keep_history:
+    :param verbose:
+    :return:
+    """
+    m = len(constraints)
+    if x_bounds is None:
+        x_bounds = []
+        for i in range(len(x0)):
+            x_bounds.append((-torch.inf, torch.inf))
+
+    elif isinstance(x0, torch.Tensor):
+        assert x0.shape[0] == x_bounds.shape[0], 'the boundaries should be n x 2 tensor'
+        assert len(x_bounds.shape) == 2, 'the boundaries should be n x 2 tensor'
+        assert x_bounds.shape[1] == 2, 'the boundaries should be n x 2 tensor'
+
+    else:
+        assert len(x_bounds) == x0.shape[0], 'the boundaries should be for each variable'
+
+    def c(x: torch.Tensor) -> torch.Tensor:
+        """Returns vector of constraints at specific x"""
+        _c = torch.zeros(m).double()
+        for j in range(m):
+            _c[j] = constraints[j](x)
+        return _c
+
+    def lagrangian_a(x: torch.Tensor, lam: torch.Tensor, mu: float) -> torch.Tensor:
+        """
+        Returns :math:`\\mathcal{L}_a`
+        Nocedal, J., &amp; Wright, S. J. (2006). Numerical optimization (p. 520)
+        """
+
+        output = function(x)
+
+        for j in range(m):
+            output += -lam[j] * constraints[j](x) + mu / 2 * constraints[j](x) ** 2
+
+        return output
+
+    def p_function(g: torch.Tensor, u_l_bounds: Sequence[Tuple[float, float]]):
+        """
+        P(g, l, u) is the projection of the vector g :math:`\\in` IRn onto the rectangular box :math:`[l, u]`
+        Nocedal, J., &amp; Wright, S. J. (2006). Numerical optimization (p. 520)
+        """
+
+        for j in range(len(g)):
+            if g[j] >= u_l_bounds[j][1]:
+                g[j] = u_l_bounds[j][1]
+            elif g[j] <= u_l_bounds[j][0]:
+                g[j] = u_l_bounds[j][0]
+
+        return g
+
+    x_k, func_k, grad_k, history, round_precision = initialize(function, x0, epsilon, keep_history)
+
+    try:
+        function(x0)
+        for i in range(m):
+            constraints[i](x0)
+
+    except ArithmeticError:
+        history['message'] = 'Point out of domain'
+        return x_k, history
+
+    lambdas_k = torch.tile(abs(x0[0]), dims=(m,))
+    eta = epsilon  # Main tolerance for constraints
+    omega = eta  # Main tolerance for lagrange function
+    mu_k = 10
+    omega_k = 1 / mu_k
+    eta_k = 1 / mu_k ** 0.1
+
+    for i in range(max_iter):
+
+        def local_min_function(x):
+            grad_lagrangian = x - gradient(lambda y: lagrangian_a(y, lambdas_k, mu_k), x)
+            p = p_function(grad_lagrangian, x_bounds)
+            return (x - p).norm(2)
+
+        x_k = gd_frac(local_min_function, x_k, epsilon=omega_k,
+                      max_iter=3, keep_history=True)[0]
+
+        if verbose or keep_history:
+            func_k = function(x_k)
+            grad_k = gradient(function, x_k)
+
+        print_verbose(x_k, func_k, verbose, i + 1, round_precision)
+
+        # history
+        if keep_history:
+            history = update_history_gd(history, values=[i + 1, func_k, grad_k.norm(2), x_k.clone()])
+
+        c_k = c(x_k)
+        if c_k.norm(2) <= eta_k:
+            # test for convergence
+            if c_k.norm(2) <= eta and local_min_function(x_k) <= omega:
+                break
+
+            # update multipliers, tighten tolerances
+            lambdas_k = lambdas_k - mu_k * c_k
+            mu_k = mu_k
+            eta_k = 1 / mu_k ** 0.1
+            omega = 1 / mu_k
+        else:
+            # increase penalty parameter, tighten tolerances
+            lambdas_k = lambdas_k - mu_k * c_k
+            mu_k = mu_k * 100
+            eta_k = 1 / mu_k ** 0.1
+            omega = 1 / mu_k
 
     return x_k, history
