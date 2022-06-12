@@ -32,6 +32,13 @@ test_functions_ineq_constr = [
     )
 ]
 
+
+test_functions_eq_constr = [
+    (lambda x: (x ** 2).sum(), torch.tensor([2, -2]).double(), [lambda x: x[0] - 1]),
+    (lambda x: torch.sin(x).sum(), torch.tensor([-1, -0.1]).double(), [lambda x: x[0] - 1])
+]
+
+
 if __name__ == '__main__':
     print(bfgs(**test)[1])
     print(gd_constant(**test)[1])
@@ -39,3 +46,4 @@ if __name__ == '__main__':
     print(gd_optimal(**test)[1])
     print(primal_dual_interior(*test_functions_ineq_constr[3], keep_history=True))
     print(log_barrier_solver(*test_functions_ineq_constr[3], keep_history=True))
+    print(constrained_lagrangian_solver(*test_functions_eq_constr[1], keep_history=True))
