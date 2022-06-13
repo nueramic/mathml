@@ -1,71 +1,56 @@
 multi\_optimize
 ================
 
-:math:`\rule{125mm}{0.7pt}`
+.. toctree::
+   :glob:
+   :maxdepth: 4
+   :caption: Methods
 
-.. rubric:: Gradient descent with optimal step. Algorithm Flowchart
+   multi-optimize/gd-constant.rst
+   multi-optimize/gd-fractional.rst
+   multi-optimize/gd-optimal.rst
+   multi-optimize/gd-nonlinear_conjugate.rst
+   multi-optimize/bfgs.rst
+   multi-optimize/constr-lagrangian.rst
+   multi-optimize/log-barrier.rst
+   multi-optimize/primal-dual.rst
 
-:math:`\rule{125mm}{0.7pt}`
+Methods to solve the problem:
 
-.. image:: ../_static/flowcharts/GRAD_OPTIMAL_STEP_FLOWCHARTS.png
-    :width: 150mm
-    :alt: gradient descent with optimal step algorithm
+
+.. math::
+
+    f(x_0, x_1, \dots x_n) \rightarrow \min
+
+.. graphviz::
+    :name: sphinx.ext.graphviz
+    :caption: Sphinx and GraphViz Data Flow
+    :alt: How Sphinx and GraphViz Render the Final Document
     :align: center
 
-:math:`\rule{125mm}{0.7pt}`
+     digraph "sphinx-ext-graphviz" {
+         size="6,4";
+         rankdir="LR";
+         graph [fontname="Verdana", fontsize="12"];
+         node [fontname="Verdana", fontsize="12"];
+         edge [fontname="Sans", fontsize="9"];
 
+         sphinx [label="Sphinx", shape="component",
+                   href="https://www.sphinx-doc.org/",
+                   target="_blank"];
+         dot [label="GraphViz", shape="component",
+              href="https://www.graphviz.org/",
+              target="_blank"];
+         docs [label="Docs (.rst)", shape="folder",
+               fillcolor=green, style=filled];
+         svg_file [label="SVG Image", shape="note", fontcolor=white,
+                 fillcolor="#3333ff", style=filled];
+         html_files [label="HTML Files", shape="folder",
+              fillcolor=yellow, style=filled];
 
-.. autofunction:: nueramic_mathml.multi_optimize.gd_optimal_step
-
-
-:math:`\rule{125mm}{0.7pt}`
-
-.. rubric:: Gradient descent with fractional step. Algorithm Flowchart
-
-
-:math:`\rule{125mm}{0.7pt}`
-
-.. image:: ../_static/flowcharts/GRAD_FRAC_STEP_FLOWCHARTS.png
-    :width: 150mm
-    :alt: gradient descent with fractional step algorithm
-    :align: center
-
-:math:`\rule{125mm}{0.7pt}`
-
-
-.. autofunction:: nueramic_mathml.multi_optimize.gd_frac_step
-
-
-:math:`\rule{125mm}{0.7pt}`
-
-.. rubric:: Gradient descent with constant step. Algorithm Flowchart
-
-:math:`\rule{125mm}{0.7pt}`
-
-.. image:: ../_static/flowcharts/GRAD_CONST_STEP_FLOWCHARTS.png
-    :width: 150mm
-    :alt: gradient descent with constant step algorithm
-    :align: center
-
-:math:`\rule{125mm}{0.7pt}`
-
-
-.. autofunction:: nueramic_mathml.multi_optimize.gd_constant_step
-
-
-:math:`\rule{125mm}{0.7pt}`
-
-.. rubric:: Nonlinear conjugate gradient method. Algorithm Flowchart
-
-:math:`\rule{125mm}{0.7pt}`
-
-.. image:: ../_static/flowcharts/FR_ALG_FLOWCHARTS.png
-    :width: 150mm
-    :alt: Nonlinear conjugate gradient method
-    :align: center
-
-:math:`\rule{125mm}{0.7pt}`
-
-.. autofunction:: nueramic_mathml.multi_optimize.nonlinear_cgm
-
-.. autofunction:: nueramic_mathml.multi_optimize.bfgs
+         docs -> sphinx [label=" parse "];
+         sphinx -> dot [label=" call ", style=dashed, arrowhead=none];
+         dot -> svg_file [label=" draw "];
+         sphinx -> html_files [label=" render "];
+         svg_file -> html_files [style=dashed];
+     }
