@@ -29,7 +29,8 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinxcontrib.katex',
     'sphinx.ext.autosectionlabel',
-    'sphinx_copybutton'
+    'sphinx_copybutton',
+    'sphinx.ext.graphviz'
 ]
 copybutton_prompt_text = r'>>> |\.\.\. |\$ |'
 copybutton_prompt_is_regexp = True
@@ -66,3 +67,6 @@ latex_elements = {'extraclassoptions': 'openany,oneside',
 math_number_all = True
 math_numfig = False
 latex_use_xindy = False
+
+# -- GraphViz configuration ----------------------------------
+graphviz_output_format = 'svg'
