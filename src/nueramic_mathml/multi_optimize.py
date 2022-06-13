@@ -53,10 +53,11 @@ def bfgs(function: Callable[[torch.Tensor], torch.Tensor],
          verbose: bool = False,
          keep_history: bool = False) -> Tuple[torch.Tensor, HistoryBFGS]:
     """
-    Returns a tensor n x 1 with optimal point using the BFGS method [1]_
+    Returns a tensor n x 1 with optimal point and history using the BFGS method [1]_
 
     Broyden–Fletcher–Goldfarb–Shanno algorithm
     The algorithm does not use Wolfe conditions. Instead of wolfe, alg uses the optimal step.
+
 
     .. note::
         The algorithm only works for a flat x0, and the functions should depend on a flat array
@@ -74,6 +75,16 @@ def bfgs(function: Callable[[torch.Tensor], torch.Tensor],
     :param verbose: flag of printing iteration logs
     :param keep_history: flag of return history
     :return: tuple with point and history.
+
+    .. rubric:: Examples
+
+    .. code-block:: python3
+
+        >>> def func(x): return 10 * x[0] ** 2 + x[1] ** 2 / 5
+        >>> x_0 = torch.tensor([1, 2])
+        >>> solution = bfgs(func, x_0)
+        >>> print(solution[0])
+        tensor([3.4372e-14, 1.8208e-14], dtype=torch.float64)
     """
 
     # initialization
@@ -158,6 +169,7 @@ def gd_constant(function: Callable[[torch.Tensor], torch.Tensor],
                 verbose: bool = False,
                 keep_history: bool = False) -> Tuple[torch.Tensor, HistoryGD]:
     """
+    Returns a tensor n x 1 with optimal point and history using
     Algorithm with constant step.
     The gradient of the function shows us the direction of increasing the function.
     The idea is to move in the opposite direction to :math:`\\displaystyle x_{k + 1} \\text{ where }
@@ -166,18 +178,9 @@ def gd_constant(function: Callable[[torch.Tensor], torch.Tensor],
     But, if we add a gradient to :math:`\\displaystyle x_{k}` without changes, our method will often diverge.
     So we need to add a gradient with some weight :math:`\\displaystyle \\gamma \\text{ .}\\\\`
 
-    Code example
-
-    .. code-block:: python3
-
-        >>> def func(x): return x[0] ** 2 + x[1] ** 2
-        >>> x_0 = torch.tensor([1, 2])
-        >>> solution = gd_constant(func, x_0)
-        >>> print(solution[0])
-        {'point': array([1.91561942e-06, 3.83123887e-06]), 'f_value': 1.834798903191018e-11}
 
     :param function: callable that depends on the first positional argument
-    :param x0: numpy ndarray which is initial approximation
+    :param x0: Torch tensor which is initial approximation
     :param epsilon: optimization accuracy
     :param gamma: gradient step
     :param max_iter: maximum number of iterations
@@ -185,6 +188,15 @@ def gd_constant(function: Callable[[torch.Tensor], torch.Tensor],
     :param keep_history: flag of return history
     :return: tuple with point and history.
 
+    .. rubric:: Examples
+
+    .. code-block:: python3
+
+        >>> def func(x): return x[0] ** 2 + x[1] ** 2
+        >>> x_0 = torch.tensor([1, 2])
+        >>> solution = gd_constant(func, x_0)
+        >>> print(solution[0])
+        tensor([1.9156e-06, 3.8312e-06], dtype=torch.float64)
     """
 
     # initialization
@@ -230,22 +242,13 @@ def gd_frac(function: Callable[[torch.Tensor], torch.Tensor],
             verbose: bool = False,
             keep_history: bool = False) -> Tuple[torch.Tensor, HistoryGD]:
     """
+    Returns a tensor n x 1 with optimal point and history using
     Algorithm with fractional step.
 
-    Requirements: :math:`\\ 0 < \\lambda_0 < 1 \\text{is the step multiplier, } 0 < \\delta < 1`.
-
-    Code example
-
-    .. code-block:: python3
-
-        >>> def func(x): return x[0] ** 2 + x[1] ** 2
-        >>> x_0 = torch.tensor([1, 2])
-        >>> solution = gd_frac(func, x_0)
-        >>> print(solution[0])
-        {'point': array([1.91561942e-06, 3.83123887e-06]), 'f_value': 1.834798903191018e-11}
+    Requirements: :math:`\\ 0 < \\lambda_0 < 1`  is the step multiplier, :math:`0 < \\delta < 1` influence on step size.
 
     :param function: callable that depends on the first positional argument
-    :param x0: numpy ndarray which is initial approximation
+    :param x0: Torch tensor which is initial approximation
     :param epsilon: optimization accuracy
     :param gamma: gradient step
     :param delta: value of the crushing parameter
@@ -254,6 +257,18 @@ def gd_frac(function: Callable[[torch.Tensor], torch.Tensor],
     :param verbose: flag of printing iteration logs
     :param keep_history: flag of return history
     :return: tuple with point and history.
+
+
+
+    .. rubric:: Examples
+
+    .. code-block:: python3
+
+        >>> def func(x): return x[0] ** 2 + x[1] ** 2
+        >>> x_0 = torch.tensor([1, 2])
+        >>> solution = gd_frac(func, x_0)
+        >>> print(solution[0])
+        tensor([1.9156e-06, 3.8312e-06], dtype=torch.float64)
 
     """
 
@@ -308,10 +323,21 @@ def gd_optimal(function: Callable[[torch.Tensor], torch.Tensor],
                verbose: bool = False,
                keep_history: bool = False) -> Tuple[torch.Tensor, HistoryGD]:
     """
+    Returns a tensor n x 1 with optimal point and history using
     Algorithm with optimal step.
     The idea is to choose a gamma that minimizes the function in the direction :math:`\\ f'(x_k)`
 
-    Code example
+
+
+    :param function: callable that depends on the first positional argument
+    :param x0: Torch tensor which is initial approximation
+    :param epsilon: optimization accuracy
+    :param max_iter: maximum number of iterations
+    :param verbose: flag of printing iteration logs
+    :param keep_history: flag of return history
+    :return: tuple with point and history.
+
+    .. rubric:: Examples
 
     .. code-block:: python3
 
@@ -319,16 +345,7 @@ def gd_optimal(function: Callable[[torch.Tensor], torch.Tensor],
         >>> x_0 = torch.tensor([1, 2])
         >>> solution = gd_optimal(func, x_0)
         >>> print(solution[0])
-        {'point': array([9.21321369e-08, 1.84015366e-07]), 'f_value': -0.9999999999999577}
-
-
-    :param function: callable that depends on the first positional argument
-    :param x0: numpy ndarray which is initial approximation
-    :param epsilon: optimization accuracy
-    :param max_iter: maximum number of iterations
-    :param verbose: flag of printing iteration logs
-    :param keep_history: flag of return history
-    :return: tuple with point and history.
+        tensor([9.2070e-08, 1.8405e-07], dtype=torch.float64)
     """
 
     # initialization
@@ -378,11 +395,25 @@ def nonlinear_cgm(function: Callable[[torch.Tensor], torch.Tensor],
                   verbose: bool = False,
                   keep_history: bool = False) -> Tuple[torch.Tensor, HistoryGD]:
     """
+    Returns a tensor n x 1 with optimal point and history.
     Algorithm works when the function is approximately quadratic near the minimum, which is the case when the
-    function is twice differentiable at the minimum and the second derivative is non-singular there.
+    function is twice differentiable at the minimum and the second derivative is non-singular there [1]_
+
+    .. rubric:: References
+
+    ..  [1] Nocedal, J., &amp; Wright, S. J. (2006). 5.2 NONLINEAR CONJUGATE GRADIENT METHOD
+        In Numerical optimization (pp. 121). essay, Springer.
+
+    :param function: callable that depends on the first positional argument
+    :param x0: Torch tensor which is initial approximation
+    :param epsilon: optimization accuracy
+    :param max_iter: maximum number of iterations
+    :param verbose: flag of printing iteration logs
+    :param keep_history: flag of return history
+    :return: tuple with point and history.
 
 
-    Code example
+    .. rubric:: Examples
 
     .. code-block:: python3
 
@@ -390,16 +421,7 @@ def nonlinear_cgm(function: Callable[[torch.Tensor], torch.Tensor],
         >>> x_0 = torch.tensor([1, 2])
         >>> solution = nonlinear_cgm(func, x_0)
         >>> print(solution[0])
-        {'point': array([-1.70693616e-07,  2.90227591e-06]), 'f_value': 1.9760041961386155e-12}
-
-    :param function: callable that depends on the first positional argument
-    :param x0: numpy ndarray which is initial approximation
-    :param epsilon: optimization accuracy
-    :param max_iter: maximum number of iterations
-    :param verbose: flag of printing iteration logs
-    :param keep_history: flag of return history
-    :return: tuple with point and history.
-
+        tensor([6.9846e+25, 4.2454e+26], dtype=torch.float64)
     """
 
     # initialization
@@ -451,16 +473,19 @@ def log_barrier_function(function: Callable[[torch.Tensor], torch.Tensor],
                          inequality_constraints: Sequence[Callable[[torch.Tensor], torch.Tensor]]
                          ) -> torch.Tensor:
     """
-    Support function. Compute log-barrier function .. math::
+    Support function. Compute log-barrier function
+
+    .. math::
 
         P(x, \\mu) = f(x) - \\mu \\sum_{i\\in\\mathcal{I}}\\ln c_i(x)
 
-    :param function:
-    :param x0: some specific point x
-    :param mu:
+    :param function: callable that depends on the first positional argument
+    :param x0: some specific point x(Torch tensor)
+    :param mu: parameter weighing constraints
     :param inequality_constraints: :math:`\\mathcal{I}` is set of inequality functions
-    :return:
+    :return: tuple with point and history.
     """
+
     m = len(inequality_constraints)  # Amount of inequality constraints
     output_lb = function(x0)
     for j in range(m):
@@ -486,26 +511,39 @@ def primal_dual_interior(function: Callable[[torch.Tensor], torch.Tensor],
                          verbose: bool = False,
                          keep_history: bool = False) -> Tuple[torch.Tensor, HistoryGD]:
     """
-    Returns point and history of minimization
+    Returns point and history of minimization. [1]_
 
-    AIM: minimize function(x) subject to c(x) >= 0; c from inequality_constraints
+    AIM: minimize :math:`\\ f(x)` subject to :math:`\\ c(x) \\geqslant 0`; c from inequality_constraints
 
-    :param function:
-    :param x0:
-    :param inequality_constraints:
+    :math:`\\ B(x,\\mu) = f(x) - \\mu \\sum_{i=1}^m \\log(c_i(x)) \\rightarrow \\min`
+
+    Here :math:`\\mu` is a small positive scalar, :math:`\\mu \\rightarrow 0`
+
+    :param function: callable that depends on the first positional argument
+    :param x0: some specific point x(Torch tensor)
+    :param inequality_constraints: :math:`\\mathcal{I}` is set of inequality functions
     :param mu: is a small positive scalar, sometimes called the "barrier parameter"
-    :param epsilon:
-    :param alpha:
-    :param max_iter:
+    :param epsilon: optimization accuracy
+    :param alpha: step length
+    :param max_iter: maximum number of iterations
     :param verbose: flag of printing iteration logs
     :param keep_history: flag of return history
-    :return:
+    :return:  tuple with point and history.
 
     :raises ArithmeticError: if x0 is not in trust region.
 
     .. rubric:: Reference
-    .. https://en.wikipedia.org/wiki/Interior-point_method
 
+    .. [1] https://en.wikipedia.org/wiki/Interior-point_method
+
+    .. rubric:: Examples
+
+    .. code-block:: python3
+
+
+        >>> primal_dual_interior(lambda x: (x[0] + 0.5) ** 2 + (x[1] - 0.5) ** 2, torch.tensor([0.9, 0.1]),
+        >>>                    [lambda x: x[0], lambda x: 1 - x[0], lambda x: x[1], lambda x: 1 - x[1]])[0]
+        tensor([1.9910e-04, 5.0000e-01], dtype=torch.float64)
     """
 
     # initialization
@@ -596,24 +634,38 @@ def log_barrier_solver(function: Callable[[torch.Tensor], torch.Tensor],
                        keep_history: bool = False,
                        verbose: bool = False) -> Tuple[torch.Tensor, HistoryGD]:
     """
-    Returns optimal point of optimization with inequality constraints by Log Barrier method.
-    Nocedal, J., &amp; Wright, S. J. (2006). 19.6 THE PRIMAL LOG-BARRIER METHOD.
-    In Numerical optimization (pp. 583–584). essay, Springer.
+    Returns optimal point of optimization with inequality constraints by Log Barrier method [1]_
+
+
+
+
+    .. rubric:: References
+
+    ..  [1] Nocedal, J., &amp; Wright, S. J. (2006). 19.6 THE PRIMAL LOG-BARRIER METHOD.
+            In Numerical optimization (pp. 583–584). essay, Springer.
+
+    :math:`\\rule{125mm}{0.2pt} \\\\`
+
+    :param function: callable that depends on the first positional argument
+    :param x0: some specific point x(Torch tensor)
+    :param epsilon: optimization accuracy
+    :param inequality_constraints: :math:`\\mathcal{I}` is set of inequality functions
+    :param max_iter: maximum number of iterations
+    :param keep_history: flag of return history
+    :param verbose: flag of printing iteration logs
+    :return: tuple with point and history.
+
+
+    .. rubric:: Examples
 
     Example for :math:`f(x, y) = (x + 0.5)^2 + (y - 0.5)^2, \\quad 0 \\le x \\le 1, 0 \\le y \\le 1`
 
+    .. code-block:: python3
+
         >>> log_barrier_solver(lambda x: (x[0] + 0.5) ** 2 + (x[1] - 0.5) ** 2, torch.tensor([0.9, 0.1]),
         >>>                    [lambda x: x[0], lambda x: 1 - x[0], lambda x: x[1], lambda x: 1 - x[1]])
-        After calculation: x, y = 0.0031, 0.5
+        tensor([0.0032, 0.5000], dtype=torch.float64)
 
-    :param function:
-    :param x0:
-    :param epsilon:
-    :param inequality_constraints:
-    :param max_iter:
-    :param keep_history:
-    :param verbose:
-    :return:
     """
     m = len(inequality_constraints)  # Amount of inequality constraints
     x_k, func_k, grad_k, history, round_precision = initialize(function, x0, epsilon, keep_history)
@@ -666,25 +718,35 @@ def constrained_lagrangian_solver(function: Callable[[float | torch.Tensor], tor
                                   keep_history: bool = False,
                                   verbose: bool = False) -> Tuple[torch.Tensor, HistoryGD]:
     """
-    Returns solution of minimization by newton_eq_const. Alias of <<Newton’s method under equality constrains>>
-    Nocedal, J., &amp; Wright, S. J. (2006). 17.4 PRACTICAL AUGMENTED LAGRANGIAN METHODS.
-    In Numerical optimization (pp. 519–521). essay, Springer.
+    Returns a tensor n x 1 with optimal point and history of minimization by newton_eq_const.
+    Alias of ''Newton’s method under equality constrains'' [1]_
 
     Example for :math:`f(x, y) = (x + 0.5)^2 + (y - 0.5)^2, \\quad x = 1`
 
-        >>> constrained_lagrangian_solver(lambda x: (x[0] + 0.5) ** 2 + (x[1] - 0.5) ** 2, torch.tensor([0.1, 0.1]),
-        >>>                                     [lambda x: x[0] - 1]))
-        After calculation: x, y = 0.99, 0.49
+    .. rubric:: References
 
-    :param function:
-    :param x0:
+    ..  [1] Nocedal, J., &amp; Wright, S. J. (2006). 17.4 PRACTICAL AUGMENTED LAGRANGIAN METHODS.
+        In Numerical optimization (pp. 519–521). essay, Springer.
+
+    :math:`\\rule{125mm}{0.2pt} \\\\`
+
+    :param function: callable that depends on the first positional argument
+    :param x0: some specific point x(Torch tensor)
     :param constraints: list of equality constraints
     :param x_bounds: bounds on x. e.g. 0 <= x[i] <= 1, then x_bounds[i] = (0, 1)
-    :param epsilon:
-    :param max_iter:
-    :param keep_history:
-    :param verbose:
-    :return:
+    :param epsilon: optimization accuracy
+    :param max_iter: maximum number of iterations
+    :param keep_history: flag of return history
+    :param verbose: flag of printing iteration logs
+    :return: tuple with point and history.
+
+    .. rubric:: Examples
+
+    .. code-block:: python3
+
+        >>> constrained_lagrangian_solver(lambda x: (x[0] + 0.5) ** 2 + (x[1] - 0.5) ** 2,
+        >>>                              torch.tensor([0.1, 0.1]),[lambda x: x[0] - 1]))
+        tensor([1.0540, 0.5000], dtype=torch.float64)
     """
     m = len(constraints)
     if x_bounds is None:
