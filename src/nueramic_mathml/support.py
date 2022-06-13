@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import List, Text, Tuple, Sequence, Any
+from typing import Text, Tuple, Sequence, Any
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict, Literal  # pylint: disable=no-name-in-module
@@ -16,47 +16,47 @@ class HistoryGSS(TypedDict):
     """
     Class with an optimization history of Golden section search
     """
-    iteration: List
-    middle_point: List[float]
-    f_value: List[float]
-    left_point: List[float]
-    right_point: List[float]
+    iteration: list
+    middle_point: list[float]
+    f_value: list[float]
+    left_point: list[float]
+    right_point: list[float]
 
 
 class HistorySPI(TypedDict):
     """
     Class with an optimization history of Successive parabolic interpolation
     """
-    iteration: List[int]
-    f_value: List[float]
-    x0: List[float]
-    x1: List[float]
-    x2: List[float]
+    iteration: list[int]
+    f_value: list[float]
+    x0: list[float]
+    x1: list[float]
+    x2: list[float]
 
 
 class HistoryBrent(TypedDict):
     """
     Class with an optimization history of Brant's algorithm
     """
-    iteration: List[int]
+    iteration: list[int]
 
-    f_least: List[float]
-    f_middle: List[float]
-    f_largest: List[float]
+    f_least: list[float]
+    f_middle: list[float]
+    f_largest: list[float]
 
-    x_least: List[float]
-    x_middle: List[float]
-    x_largest: List[float]
+    x_least: list[float]
+    x_middle: list[float]
+    x_largest: list[float]
 
-    left_bound: List[float]
-    right_bound: List[float]
-    type_step: List[Text]
+    left_bound: list[float]
+    right_bound: list[float]
+    type_step: list[Text]
 
 
 class HistoryBFGS(TypedDict):
-    iteration: List[float]
-    point: List[Tuple]
-    function: List[float]
+    iteration: list[float]
+    point: list[Tuple]
+    function: list[float]
 
 
 def update_history_brent(history: HistoryBrent, values: Sequence[Any]) -> HistoryBrent:
@@ -98,14 +98,14 @@ class HistoryGD(TypedDict):
     """
     Class with an optimization history of gradient descent methods
     """
-    iteration: List
-    f_value: List
-    f_grad_norm: List
-    x: List[Sequence]
+    iteration: list
+    f_value: list
+    f_grad_norm: list
+    x: list[Sequence]
     message: Text
 
 
-def update_history_gd(history: HistoryGD, values: List) -> HistoryGD:
+def update_history_gd(history: HistoryGD, values: list) -> HistoryGD:
     """
     Update HistoryMDO with values, which contains iteration, f_value, f_grad_norm, x as a list
 
