@@ -1,5 +1,5 @@
 import sys
-from typing import Iterable, Optional
+from typing import Optional, Callable
 
 import numpy as np
 import torch
@@ -12,15 +12,17 @@ else:
 
 class NueSGD:
 
-    def __init__(self, parameters: Iterable, lr: float = 1e-4):
+    def __init__(self, model: torch.nn.Module, lr: float = 1e-4):
         """
         Implementation of classic SGD (stochastic gradient descent) optimization algorithm.
 
-        :param parameters: model parameters
+        :param model: pytorch model that can be called and have a ".loss" method
         :param lr: learning rate. Multiplier of gradient step: x = x - lr * grad(x)
         """
-        self.parameters = list(parameters)
+        self.parameters = list(model.parameters())
+        self.model = model
         self.lr = lr
+        self.history = {'q_loss': []}
 
     @torch.no_grad()
     def step(self) -> None:
@@ -34,6 +36,7 @@ class NueSGD:
         for param in self.parameters:
             param.data -= self.lr * param.grad.data
 
+    @torch.no_grad()
     def zero_grad(self) -> None:
         """
         Make the gradients equal to zero
@@ -44,57 +47,55 @@ class NueSGD:
             if param.grad is not None:
                 param.grad.data.zero_()
 
+    def optimize(self,
+                 x: torch.Tensor,
+                 y: torch.Tensor,
+                 epochs: int = 1,
+                 batch_size: int = -1,
+                 num_verbose: int = 0,
+                 lamb: float = 0.3,
+                 print_function: Callable = print) -> [torch.nn.Module, dict]:
+        """
+        Function apply MySGD optimizer, and train model.
 
-def fit_by_sgd(model: torch.nn.Module,
-               x: torch.Tensor,
-               y: torch.Tensor,
-               epochs: int = 1,
-               batch_size: int = 1,
-               lr: float = 1e-4,
-               verbose: bool = True,
-               lamb: float = 0.3) -> [torch.nn.Module, dict]:
-    """
-    Function apply MySGD optimizer, and train model.
+        :param x: training set
+        :param y: target value
+        :param epochs: max number of sgd implements
+        :param batch_size: size of batch for each epoch. default is -1 - all data
+        :param num_verbose: number of iterations to be printed
+        :param lamb: rate of history loss evaluation
+        :param print_function: e.g. print or streamlit.write or something else
+        :return: trained model and history
+        """
+        if batch_size == -1:
+            batch_size = x.shape[0]
 
-    :param model: some pytorch model that can be called and have a ".loss" method
-    :param x: training set
-    :param y: target value
-    :param epochs: max number of sgd implements
-    :param lr: learning rate for sgd step
-    :param batch_size: size of batch for each epoch. default is 1
-    :param verbose: print flag 10 iterations of training
-    :param lamb: rate of history loss evaluation
-    :return: trained model and history
-    """
-    optimizer = NueSGD(model.parameters(), lr=lr)
-    q_new = model.loss(x, y)  # Q - functional evaluation
-    print_epochs = np.geomspace(1, epochs, 10, dtype=int)
+        q_new = self.model.loss(x, y)  # Q - functional evaluation
+        print_epochs = np.geomspace(1, epochs + 1, num_verbose, dtype=int)
 
-    history = {'q_loss': []}
+        for epoch in range(epochs):
+            i = torch.randint(0, x.shape[0], [batch_size])  # choose batch
 
-    for epoch in range(epochs):
-        i = torch.randint(0, x.shape[0], [batch_size])  # choose batch
+            # optimization
+            self.zero_grad()
+            loss = self.model.loss(x[i], y[i])
+            loss.backward()
+            self.step()
 
-        # optimization
-        optimizer.zero_grad()
-        loss = model.loss(x[i], y[i])
-        loss.backward()
-        optimizer.step()
+            # Q calculation
+            q_pre = q_new
+            q_new = q_pre * (1 - lamb) + loss.item() * lamb
 
-        # Q calculation
-        q_pre = q_new
-        q_new = q_pre * (1 - lamb) + loss.item() * lamb
+            # history updating
+            self.history['q_loss'].append(q_new.item())
 
-        # history updating
-        history['q_loss'].append(q_new.item())
+            if epoch + 1 in print_epochs:
+                print_function(f'epoch: {epoch + 1:5d} | Q: {q_new:0.4f}')
 
-        if epoch + 1 in print_epochs and verbose:
-            model.print(f'epoch: {epoch + 1: 5d} | Q: {q_new: 0.4f}')
+            if abs(q_new - q_pre) < 1e-6:
+                break
 
-        if abs(q_new - q_pre) < 1e-6:
-            break
-
-    return model, history
+        return self.model, self.history
 
 
 class HistorySA(TypedDict):
@@ -109,21 +110,18 @@ class SimulatedAnnealing:
     def __init__(self,
                  model: torch.nn.Module,
                  type_center: Literal['zero', 'neighborhood'] = 'neighborhood',
-                 init_temp: float = 10_000,
-                 radius: float = 4,
-                 temp_multiplier: float = 0.9):
+                 init_temp: float = 1_000_000,
+                 radius: float = 1,
+                 temp_multiplier: float = 0.95):
         """
         Initialization of SimulatedAnnealing algorithm. Minimize real number models (non-discrete)
 
         :param model: some pytorch model
-        :param type_center: if type_center is zero, new point (x_k+1) would be chosen from Ball(center = 0, radius).
-                            elif neighborhood, new point would be chosen from Ball(center = x_k, radius). [1]_
+        :param type_center: if type_center is zero, new point (x_k+1) would be chosen from Uniform[-radius, radius]
+                            for each parameter, elif neighborhood, new point would be chosen from
+                            Uniform[x_k - radius, x_k + radius).
         :param init_temp: initial temperature. Default is 10_000
         :param radius: ball's radius
-
-        .. rubric:: References
-        .. [1] https://en.wikipedia.org/wiki/Ball_(mathematics)
-
         """
 
         self.temp = init_temp
@@ -142,11 +140,12 @@ class SimulatedAnnealing:
         self.model = model
         self.min_temp = 1e-8
         self.best_loss = torch.inf
+        self.init_temp = init_temp
 
     @torch.no_grad()
-    def optimize(self, x: torch.Tensor, y: torch.Tensor):
+    def optimize_generator(self, x: torch.Tensor, y: torch.Tensor) -> str:
         """
-        Generator of Simulated Annealing steps.
+        Generator of Simulated Annealing steps. [1]_
 
         :math:`\\rule{125mm}{0.7pt} \\\\`
         :math:`c = x_{pre} \\text{ if type area is `neighborhood' else } c = \\theta - \\text{zero} \\\\`
@@ -163,6 +162,7 @@ class SimulatedAnnealing:
 
         :param x: training set
         :param y: target value
+        :return: verbose strign with iteration and loss
 
         .. code-block:: python3
 
@@ -190,6 +190,10 @@ class SimulatedAnnealing:
             >>> model.loss(xr, yr)
             tensor(3.4633, grad_fn=<MseLossBackward0>)
 
+        .. rubric:: References
+
+        .. [1] Van Laarhoven, P. J. M., & Aarts, E. H. L. (1987). Simulated annealing: Theory and applications
+               (1987th ed.). Kluwer Academic. pp.10-11
 
         """
         while self.temp > self.min_temp:
@@ -250,3 +254,14 @@ class SimulatedAnnealing:
         else:
             # set best parameters
             self.model.load_state_dict(self.best_state)
+
+    @torch.no_grad()
+    def optimize(self, x: torch.Tensor, y: torch.Tensor) -> [torch.nn.Module, HistorySA]:
+
+        for _ in self.optimize_generator(x, y):
+            pass
+
+        else:
+            self.temp = self.init_temp
+
+        return self.model, self.history
