@@ -2,6 +2,8 @@ from .calculus import *
 from .one_optimize import *
 from .support import *
 from .multi_optimize import *
+from .ml.optimize import *
+
 
 __all__ = [
     "hessian",
@@ -18,5 +20,7 @@ __all__ = [
     "nonlinear_cgm",
     "primal_dual_interior",
     "log_barrier_solver",
-    "constrained_lagrangian_solver"
+    "constrained_lagrangian_solver",
+    "NueSGD",
+    "SimulatedAnnealing"
 ]
