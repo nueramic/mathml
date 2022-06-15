@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from src.nueramic_mathml.ml import binary_classification_report
+from src.nueramic_mathml.ml.metrics import binary_classification_report
 
 metrics_tests = [
     (
