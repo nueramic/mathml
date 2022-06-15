@@ -124,12 +124,13 @@ def best_threshold(x: torch.Tensor, y_true: torch.Tensor, model: torch.nn.Module
     :param step_size: step size of linear search
     :return:
     """
+    y_true = y_true.flatten()
     metric = {'f1': f_score, 'by_roc': lambda y1, y2: tpr(y1, y2) - fpr(y1, y2)}[metric]
     best_t = 0
     best_metric = 0
 
     for threshold in np.arange(0, 1 + step_size, step_size):
-        y_prob = model(x).detach().flatten().cpu().numpy()
+        y_prob = model(x).flatten()
         y_pred = (y_prob >= threshold) * 1
         metric_i = metric(y_true, y_pred)
 
