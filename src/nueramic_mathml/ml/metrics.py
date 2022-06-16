@@ -13,7 +13,7 @@ import torch
 
 def check_tensors(*args: torch.Tensor) -> None:
     """
-    Checks if arrays is 1d or torch.Tensor
+    Checks if arrays is 1d and torch.Tensor
 
     :param args: tensors
     :return:
@@ -60,7 +60,7 @@ def precision(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
     """
     Return Positive Predictive Value . PPV = TP / (TP + FP)
 
-    .. note:: if TP + FN == 0, then PPV = 0
+    .. note:: if TP + FP == 0, then PPV = 0
 
     :param y_true: array with true values of binary classification
     :param y_pred: array with prediction values of binary classification
@@ -204,6 +204,26 @@ def binary_classification_report(y_true: torch.Tensor,
         'f1': f_score(y_true, y_pred),
         'auc_roc': None if y_prob is None else auc_roc(y_true, y_prob)
     }
+
+
+def r2_score(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
+    """
+    Return R2 metric of regression
+
+    .. math::
+
+        \\mathbf{R}^{2} = 1 - \\frac{\\sum_{i=1}^{n}(\\hat y_i - y_i)^2}{\\sum_{i = 1}^{n}(\\hat y_i - \\overline y)^2}
+
+    :param y_true: array with true values of binary classification
+    :param y_pred: array with prediction values of binary classification
+    :return:
+    """
+    check_tensors(y_true, y_pred)
+    y_true, y_pred = y_true.float(), y_pred.float()
+    rss = (y_true - y_pred).norm(2) ** 2
+    tss = (y_true - y_true.mean()).norm(2) ** 2
+
+    return float(1 - rss / tss)
 
 
 if __name__ == '__main__':

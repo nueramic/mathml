@@ -23,9 +23,10 @@ some interesting features, for example, regression on stock prices or viewing gr
    modules/calculus.rst
    modules/one_optimize.rst
    modules/multi_optimize.rst
-   modules/ml_regression.rst
    modules/ml_optimize.rst
+   modules/ml_regression.rst
    modules/ml_classification.rst
+   modules/ml_metrics.rst
 
 
 Indices and Tables

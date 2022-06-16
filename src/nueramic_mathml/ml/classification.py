@@ -116,7 +116,12 @@ class LogisticRegressionRBF(BaseClassification):
         y_pred: torch.Tensor = (y_prob > self.best_threshold) * 1
         return y_pred
 
-    def fit(self, x: torch.Tensor, y: torch.Tensor, epochs=1, l1_lambda: float = 0) -> torch.nn.Module:
+    def fit(self,
+            x: torch.Tensor,
+            y: torch.Tensor,
+            epochs=1,
+            l1_lambda: float = 0,
+            show_epoch: int = 0) -> torch.nn.Module:
         """
         Returns trained model Logistic Regression with RBF
 
@@ -124,12 +129,13 @@ class LogisticRegressionRBF(BaseClassification):
         :param y: target value
         :param epochs: max number of sgd implements
         :param l1_lambda: l1 regularization weight
+        :param show_epoch: amount of showing epochs
         :return: trained model
         """
         x = x.float()
         y = y.float()
 
-        print_epochs = np.unique(np.geomspace(1, epochs + 1, self.show_epoch, dtype=int))
+        print_epochs = np.unique(np.linspace(1, epochs, min(epochs, show_epoch), dtype=int))
 
         phi_matrix = self.make_phi_matrix(x)
         optimizer = torch.optim.Adam(self.parameters())
@@ -234,7 +240,7 @@ class LogisticRegression(BaseClassification):
         x = x.float()
         y = y.float()
 
-        print_epochs = np.unique(np.geomspace(1, epochs + 1, show_epoch, dtype=int))
+        print_epochs = np.unique(np.linspace(1, epochs, min(epochs, show_epoch), dtype=int))
 
         optimizer = torch.optim.Adam(self.parameters())
         loss = torch.nn.BCELoss()
@@ -350,7 +356,7 @@ class SVM(BaseClassification):
 
         x = self.scaler(x.float())
 
-        print_epochs = np.unique(np.geomspace(1, epochs + 1, show_epoch, dtype=int))
+        print_epochs = np.unique(np.linspace(1, epochs, min(epochs, show_epoch), dtype=int))
 
         optimizer = torch.optim.Adam(self.parameters(), weight_decay=l2_lambda)
         loss = torch.nn.MarginRankingLoss(margin=1)  # hinge loss if x2 = 0 and margin = 1
@@ -386,7 +392,7 @@ class SVM(BaseClassification):
 
         """
         x = self.scaler(x.float())
-        print_epochs = np.unique(np.geomspace(1, epochs, show_epoch, dtype=int))
+        print_epochs = np.unique(np.linspace(1, epochs, min(epochs, show_epoch), dtype=int))
         weights = torch.zeros(x.shape[1])
         bias = torch.zeros(1)
         t = 0
