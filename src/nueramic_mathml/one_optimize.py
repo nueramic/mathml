@@ -212,7 +212,7 @@ def successive_parabolic_interpolation(function: Callable[[float | torch.Tensor]
 
     history: HistorySPI = {'iteration': [], 'f_value': [], 'x0': [], 'x1': [], 'x2': []}
     x0, x1 = bounds[0], bounds[1]
-    x2 = (x0 + x1) / 2
+    x2 = (x0 + x1) / 3 * 2
     f0 = type_opt_const * function(x0)
     f1 = type_opt_const * function(x1)
     f2 = type_opt_const * function(x2)
