@@ -692,6 +692,7 @@ def log_barrier_solver(function: Callable[[torch.Tensor], torch.Tensor],
 
             tau *= 0.9
             if tau <= epsilon:
+                history['message'] = 'Optimization terminated successfully. code 0'
                 break
 
             # verbose

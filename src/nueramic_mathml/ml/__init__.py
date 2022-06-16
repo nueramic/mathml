@@ -1,6 +1,10 @@
 from .optimize import *
+from .classification import LogisticRegressionRBF, LogisticRegression
+from . import metrics
 
 __all__ = [
     "NueSGD",
-    "fit_by_sgd",
+    "SimulatedAnnealing",
+    "LogisticRegression",
+    "LogisticRegressionRBF"
 ]

@@ -3,6 +3,7 @@ from .one_optimize import *
 from .support import *
 from .multi_optimize import *
 from .ml.optimize import *
+from .ml.classification import *
 
 
 __all__ = [
@@ -22,5 +23,7 @@ __all__ = [
     "log_barrier_solver",
     "constrained_lagrangian_solver",
     "NueSGD",
-    "SimulatedAnnealing"
+    "SimulatedAnnealing",
+    "LogisticRegression",
+    "LogisticRegressionRBF",
 ]
