@@ -415,6 +415,8 @@ def nonlinear_cgm(function: Callable[[torch.Tensor], torch.Tensor],
 
     .. rubric:: Examples
 
+    Example for :math:`f(x, y) = (x + 0.5)^2 + (y - 0.5)^2, \\quad x = 1`
+
     .. code-block:: python3
 
         >>> def func(x): return 10 * x[0] ** 2 + x[1] ** 2 / 5
