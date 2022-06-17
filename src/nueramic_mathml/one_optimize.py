@@ -107,8 +107,8 @@ def golden_section_search(function: Callable[[float | torch.Tensor], float],
 
             middle_point: float = (a + b) / 2
             if verbose:
-                print(f'Iteration: {i} \\t|\\t point = {middle_point :0.3f} '
-                      f'\\t|\\t f(point) = {function(middle_point): 0.3f}')
+                print(f'Iteration: {i} \t|\t point = {middle_point :0.3f} '
+                      f'\t|\t f(point) = {function(middle_point): 0.3f}')
 
             if keep_history:
                 history['iteration'].append(i)
