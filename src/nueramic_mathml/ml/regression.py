@@ -169,7 +169,7 @@ class BaseRegressionModel(torch.nn.Module):
 
         criterion = torch.nn.MSELoss()
         optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=l2_constant)
-        print_epochs = np.unique(np.linspace(1, epochs, min(epochs, show_epoch), dtype=int))
+        print_epochs = np.linspace(1, epochs, min(epochs, show_epoch), dtype=int)
 
         for epoch in range(1, epochs + 1):
             optimizer.zero_grad()
