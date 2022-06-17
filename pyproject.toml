@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "nueramic_mathml"
-version = "0.0.1.11"
+version = "0.1"
 description = "Math algorithms in ML on torch"
 authors = [
     "Victor Barbarich <vktrbr@icloud.com>",
     "Adelina Tsoi <dlnxxts@gmail.com>"
 ]
 license = "MIT"
-readme = "README.md"
+readme = "README.rst"
 
 repository = "https://github.com/nueramic/mathml"
 classifiers = [

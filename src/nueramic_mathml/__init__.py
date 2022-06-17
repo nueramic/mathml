@@ -26,4 +26,4 @@ __all__ = [
     "metrics"
 ]
 
-__version__ = '1.0 dev 17'
+__version__ = '1.0 dev 20'
