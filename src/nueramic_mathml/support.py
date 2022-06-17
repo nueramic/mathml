@@ -134,8 +134,7 @@ def print_verbose(x_k: torch.Tensor,
     :param round_precision: precision of printing float numbers
     :return: none
     """
-    round_precision = min(round_precision, 4)
     if verbose:
         print(f'iteration: {iteration:4d}  |  '
-              f'x = [{", ".join(map(lambda x: f"{round(float(x), round_precision):>10.4f}", x_k))}]  |  '
+              f'x = [{", ".join(map(lambda x: f"{round(float(x), 4):>10.4f}", x_k))}]  |  '
               f'f(x) = {round(float(func_k), round_precision)}')
