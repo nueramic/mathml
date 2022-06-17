@@ -7,10 +7,15 @@ Gradient descent with constant step
 
 :math:`\rule{125mm}{0.7pt}`
 
-.. image:: ../../_static/flowcharts/GRAD_CONST_STEP_FLOWCHARTS.png
-    :width: 150mm
-    :alt: gradient descent with constant step algorithm
+.. image:: ../../_static/flowcharts/GRAD_CONST_STEP_FLOWCHARTS.svg
+    :alt: gradient descent with fractional step algorithm
     :align: center
+    :class: only-light
+
+.. image:: ../../_static/flowcharts/GRAD_CONST_STEP_FLOWCHARTS_white.svg
+    :alt: gradient descent with fractional step algorithm
+    :align: center
+    :class: only-dark
 
 :math:`\rule{125mm}{0.7pt}`
 
