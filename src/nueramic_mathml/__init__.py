@@ -22,8 +22,5 @@ __all__ = [
     "primal_dual_interior",
     "log_barrier_solver",
     "constrained_lagrangian_solver",
-    "NueSGD",
-    "SimulatedAnnealing",
-    "LogisticRegression",
-    "LogisticRegressionRBF",
+    "ml"
 ]

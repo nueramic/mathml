@@ -1,7 +1,7 @@
 import pytest
 import torch.nn
 
-from src.nueramic_mathml import NueSGD, SimulatedAnnealing
+from src.nueramic_mathml.ml import NueSGD, SimulatedAnnealing
 
 torch.random.manual_seed(7)
 x_ = torch.rand(100, 2) * 100
