@@ -4,7 +4,7 @@ from .support import *
 from .multi_optimize import *
 from .ml.optimize import *
 from .ml.classification import *
-
+from .ml import metrics
 
 __all__ = [
     "hessian",
@@ -22,5 +22,8 @@ __all__ = [
     "primal_dual_interior",
     "log_barrier_solver",
     "constrained_lagrangian_solver",
-    "ml"
+    "ml",
+    "metrics"
 ]
+
+__version__ = '1.0 dev 17'
