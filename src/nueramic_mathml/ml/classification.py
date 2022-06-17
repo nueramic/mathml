@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 from typing import Callable
 
@@ -27,7 +29,12 @@ class BaseClassification(torch.nn.Module):
         :return:
         """
         y_prob: torch.Tensor = self.forward(x)
-        y_pred: torch.Tensor = (y_prob > self.best_threshold) * 1
+        try:
+            y_pred: torch.Tensor = (y_prob > self.best_threshold) * 1
+        except AttributeError:
+            y_pred = self.predict(x)
+            y_prob: None = None
+
         return binary_classification_report(y, y_pred, y_prob)
 
 
@@ -138,7 +145,7 @@ class LogisticRegression(BaseClassification):
             optimizer.step()
 
             with torch.no_grad():
-                if epoch + 1 in print_epochs:
+                if epoch in print_epochs:
                     print_function(f'Epoch: {epoch: 5d} | CrossEntropyLoss: {output.item(): 0.5f}')
 
         self.best_threshold = best_threshold(x, y, self, metric='f1')
@@ -282,7 +289,7 @@ class LogisticRegressionRBF(BaseClassification):
             optimizer.step()
 
             with torch.no_grad():
-                if epoch + 1 in print_epochs:
+                if epoch in print_epochs:
                     print_function(f'Epoch: {epoch: 5d} | CrossEntropyLoss: {output.item(): 0.5f}')
 
         self.best_threshold = best_threshold(x, y, self, metric='f1')
@@ -436,7 +443,7 @@ class SVM(BaseClassification):
             optimizer.step()
 
             with torch.no_grad():
-                if epoch + 1 in print_epochs:
+                if epoch in print_epochs:
                     print_function(f'Epoch: {epoch: 5d} | HingeLoss: {output.item(): 0.5f}')
 
         return self
@@ -501,7 +508,7 @@ class SVM(BaseClassification):
         """
         x = self.scaler(x).float()
         y = torch.zeros(x.shape[0])
-        reversed_names = {0: 1} | {v: u for u, v in self.class_names.items()}
+        reversed_names = {**{0: 1}, **{v: u for u, v in self.class_names.items()}}
         for i, xi in enumerate(self.weights(x).sign().flatten().int()):
             y[i] = reversed_names[int(xi)]
 
