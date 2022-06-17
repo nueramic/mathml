@@ -18,8 +18,12 @@ multi\_optimize
 You can choose the best model using our flowchart
 
 
-.. image:: ../_static/flowcharts/choose-3.png
-    :width: 180mm
+.. image:: ../_static/flowcharts/choose-3-black.svg
     :alt: gradient descent with fractional step algorithm
     :align: center
+    :class: only-light
 
+.. image:: ../_static/flowcharts/choose-3-white.svg
+    :alt: gradient descent with fractional step algorithm
+    :align: center
+    :class: only-dark
