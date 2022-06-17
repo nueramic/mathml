@@ -516,17 +516,26 @@ class SVM(BaseClassification):
 
 
 if __name__ == '__main__':
-    from sklearn.datasets import make_blobs
-    from metrics import accuracy
+    # from sklearn.datasets import make_blobs
+    # from metrics import accuracy
 
-    torch.random.manual_seed(7)
-    _x, _y = make_blobs(1000, centers=2, random_state=8)
+    # torch.random.manual_seed(7)
+    # _x, _y = make_blobs(1000, centers=2, random_state=8)
+    # _x, _y = torch.tensor(_x), torch.tensor(_y)
+    # m = SVM().fit(_x, _y)
+    # print(accuracy(_y, m.predict(_x)))
+    # m = SVM().fit(_x, _y, method='pegasos')
+    # print(accuracy(_y, m.predict(_x)))
+    # m = LogisticRegression().fit(_x, _y)
+    # print(accuracy(_y, m.predict(_x)))
+    # m = LogisticRegressionRBF(_x[:100]).fit(_x, _y)
+    # print(accuracy(_y, m.predict(_x)))
+
+    from sklearn.datasets import make_moons
+
+    _x, _y = make_moons(10_000, noise=.1, random_state=84)
     _x, _y = torch.tensor(_x), torch.tensor(_y)
-    m = SVM().fit(_x, _y)
-    print(accuracy(_y, m.predict(_x)))
-    m = SVM().fit(_x, _y, method='pegasos')
-    print(accuracy(_y, m.predict(_x)))
-    m = LogisticRegression().fit(_x, _y)
-    print(accuracy(_y, m.predict(_x)))
-    m = LogisticRegressionRBF(_x[:100]).fit(_x, _y)
-    print(accuracy(_y, m.predict(_x)))
+
+    logistic_model_rbf = LogisticRegressionRBF(_x[:1000]).fit(_x, _y, show_epoch=10)
+
+    print(logistic_model_rbf.metrics_tab(_x, _y))
