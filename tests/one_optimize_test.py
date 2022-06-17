@@ -8,6 +8,7 @@ test_functions = [  # func, [a, b], true_point
     (lambda x: x ** 2, (-2, 2), 0, 'parabola'),
     (lambda x: - numpy.exp(numpy.cos(x)), (-2, 2), 0, 'e(cos(x))'),
     (lambda x: - numpy.log(x), (1., 4.), 4, 'log(x)'),
+    (lambda x: x**3 - x**2 - x, (0, 1.5), 1, ':(( test'),
     (lambda x: - numpy.log(x) + numpy.pi * numpy.sin(x) * x, (2.5, 7), 4.925548, '-ln(x) + pi sin(x) x')
 ]
 
