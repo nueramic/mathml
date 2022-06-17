@@ -235,10 +235,10 @@ def successive_parabolic_interpolation(function: Callable[[float | torch.Tensor]
             p = (x1 - x2) ** 2 * (f2 - f0) + (x0 - x2) ** 2 * (f1 - f2)
             q = 2 * ((x1 - x2) * (f2 - f0) + (x0 - x2) * (f1 - f2))
 
-            if p != 0:
+            if p == 0:
                 print('Searching finished. Select an another initial state. Numerator is zero. code 2')
                 return x2, history
-            if q != 0:
+            if q == 0:
                 print('Searching finished. Select an another initial state. Denominator is zero. code 2')
                 return x2, history
 
@@ -486,17 +486,18 @@ def brent(function: Callable[[float | torch.Tensor], float],
         if keep_history:
             history = update_history_brent(
                 history,
-                [i,
-                 type_opt_const * f_least,
-                 type_opt_const * f_middle,
-                 type_opt_const * f_largest,
-                 x_least,
-                 x_middle,
-                 x_largest,
-                 a,
-                 b,
-                 name_step
-                 ]
+                [
+                    i,
+                    type_opt_const * f_least,
+                    type_opt_const * f_middle,
+                    type_opt_const * f_largest,
+                    x_least,
+                    x_middle,
+                    x_largest,
+                    a,
+                    b,
+                    name_step
+                ]
             )
 
         if verbose:
@@ -505,5 +506,3 @@ def brent(function: Callable[[float | torch.Tensor], float],
     else:
         print('Searching finished. Max iterations have been reached. code 1')
         return x_least, history
-
-# enf of One dimensional part
