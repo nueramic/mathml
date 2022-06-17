@@ -163,9 +163,10 @@ def roc_curve(y_true: torch.Tensor, y_prob: torch.Tensor, n_thresholds: Union[in
     fpr_array = []
     check_tensors(y_true, y_prob)
 
-    thresholds = np.sort(np.unique(y_prob))[::-1]
+    thresholds, _ = torch.sort(torch.unique(y_prob), descending=True)
+
     if n_thresholds is not None:
-        thresholds = thresholds[np.linspace(0, len(thresholds) - 1, n_thresholds, dtype=int)]
+        thresholds = thresholds[torch.linspace(0, len(thresholds) - 1, n_thresholds, dtype=torch.long)]
 
     for threshold in thresholds:
         tpr_array.append(tpr(y_true, (y_prob >= threshold) * 1))
