@@ -86,8 +86,8 @@ def golden_section_search(function: Callable[[float | torch.Tensor], float],
         history: HistoryGSS = {'iteration': [], 'middle_point': [], 'f_value': [], 'left_point': [], 'right_point': []}
 
     if verbose:
-        print(f'Iteration: {0} \\t|\\t point = {(a + b) / 2 :0.3f} '
-              f'\\t|\\t f(point) = {function((a + b) / 2): 0.3f}')
+        print(f'Iteration: {0} \t|\t point = {(a + b) / 2 :0.3f} '
+              f'\t|\t f(point) = {function((a + b) / 2): 0.3f}')
 
     try:
         for i in range(1, max_iter):
