@@ -316,7 +316,7 @@ def brent(function: Callable[[float | torch.Tensor], float],
     :math:`\\qquad \\text{if } \\displaystyle remainder < previous \\ remainder \\ \\& \\
     x_{least} + remainder \\in (a, b):\\\\`
 
-    :math:`\\qquad \\qquad  \\text{use  ``paraboloic" } \\displaystyle remainder\\\\`
+    :math:`\\qquad \\qquad  \\text{use  ``parabolic" } \\displaystyle remainder\\\\`
 
     :math:`\\qquad \\text{else:}\\\\`
     :math:`\\qquad \\qquad \\text{make  ``golden"  } \\displaystyle remainder\\\\`
