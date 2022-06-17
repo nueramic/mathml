@@ -11,17 +11,26 @@ import numpy as np
 import torch
 
 
-def check_tensors(*args: torch.Tensor) -> None:
+def check_tensors(*tensors: torch.Tensor) -> [torch.Tensor]:
     """
-    Checks if arrays is 1d and torch.Tensor
+    Returns flattened tensors and checks if the arrays have the same size and flare.Tensor
 
-    :param args: tensors
-    :return:
+    :param tensors: tensors
+    :return: tensors
     """
-    for arr in args:
+    shapes = []
+    output = []
+    for arr in tensors:
         if arr is not None:
             assert isinstance(arr, torch.Tensor), 'arrays must be torch Tensor'
-            assert len(arr.shape) == 1, 'arrays must me 1-d'
+            arr = arr.flatten() 
+            shapes.append(arr.shape[0])
+            
+        output.append(arr)
+    
+    assert len(np.unique(shapes)) == 1, 'Tensors must have same sizes'
+
+    return output
 
 
 def tpr(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
@@ -34,7 +43,7 @@ def tpr(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
     :param y_pred: array with prediction values of binary classification
     :return:
     """
-    check_tensors(y_true, y_pred)
+    y_true, y_pred = check_tensors(y_true, y_pred)
     tp = ((y_true == y_pred) & (y_true == 1)).sum()
     p = (y_true == 1).sum()
     return float(tp / max(p, 1))
@@ -50,7 +59,7 @@ def fpr(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
     :param y_pred: array with prediction values of binary classification
     :return:
     """
-    check_tensors(y_true, y_pred)
+    y_true, y_pred = check_tensors(y_true, y_pred)
     fp = ((y_true != y_pred) & (y_true == 0)).sum()
     n = (y_true == 0).sum()
     return float(fp / max(n, 1))
@@ -66,7 +75,7 @@ def precision(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
     :param y_pred: array with prediction values of binary classification
     :return:
     """
-    check_tensors(y_true, y_pred)
+    y_true, y_pred = check_tensors(y_true, y_pred)
     tp = ((y_true == y_pred) & (y_true == 1)).sum()
     fp = ((y_true != y_pred) & (y_true == 0)).sum()
     return float(tp / max(tp + fp, 1))
@@ -83,8 +92,8 @@ def accuracy(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
     :param y_pred: array with prediction values of binary classification
     :return:
     """
-    check_tensors(y_true, y_pred)
-    return float((y_true == y_pred).sum() / y_true.shape[0])
+    y_true, y_pred = check_tensors(y_true, y_pred)
+    return float(torch.eq(y_true, y_pred).sum() / y_true.shape[0])
 
 
 def f_score(y_true: torch.Tensor, y_pred: torch.Tensor, beta: float = 1) -> float:
@@ -102,7 +111,7 @@ def f_score(y_true: torch.Tensor, y_pred: torch.Tensor, beta: float = 1) -> floa
     :param beta: is chosen such that recall is considered beta times as important as precision
     :return:
     """
-    check_tensors(y_true, y_pred)
+    y_true, y_pred = check_tensors(y_true, y_pred)
     _precision = precision(y_true, y_pred)
     _recall = tpr(y_true, y_pred)
 
@@ -154,9 +163,10 @@ def roc_curve(y_true: torch.Tensor, y_prob: torch.Tensor, n_thresholds: Union[in
     fpr_array = []
     check_tensors(y_true, y_prob)
 
-    thresholds = np.sort(np.unique(y_prob))[::-1]
+    thresholds, _ = torch.sort(torch.unique(y_prob), descending=True)
+
     if n_thresholds is not None:
-        thresholds = thresholds[np.linspace(0, len(thresholds) - 1, n_thresholds, dtype=int)]
+        thresholds = thresholds[torch.linspace(0, len(thresholds) - 1, n_thresholds, dtype=torch.long)]
 
     for threshold in thresholds:
         tpr_array.append(tpr(y_true, (y_prob >= threshold) * 1))
@@ -189,7 +199,6 @@ def binary_classification_report(y_true: torch.Tensor,
                                  ) -> dict:
     """
     Returns dict with recall, precision, accuracy, f1, auc roc scores
-    best threshold
 
     :param y_true: array with true values of binary classification
     :param y_pred: array with prediction values of binary classification
@@ -218,7 +227,7 @@ def r2_score(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
     :param y_pred: array with prediction values of binary classification
     :return:
     """
-    check_tensors(y_true, y_pred)
+    y_true, y_pred = check_tensors(y_true, y_pred)
     y_true, y_pred = y_true.float(), y_pred.float()
     rss = (y_true - y_pred).norm(2) ** 2
     tss = (y_true - y_true.mean()).norm(2) ** 2

@@ -15,7 +15,8 @@ def gradient(function: Callable[[torch.Tensor], torch.Tensor], x0: torch.Tensor,
 
     .. math::
 
-        \\displaystyle \\frac{\\partial f}{\\partial x} \\approx {\\frac {f(x+h)-f(x-h)}{2h}}
+        \\frac{\\partial f}{\\partial x_i} \\approx {\\frac {f(x_1, \\dots, x_i+h, \\dots, x_n)-
+        f(x_1, \\dots, x_i-h, \\dots, x_n)}{2h}}
 
     Gradient
 
@@ -26,7 +27,8 @@ def gradient(function: Callable[[torch.Tensor], torch.Tensor], x0: torch.Tensor,
          \\enspace \\dots \\enspace \\frac{\\partial f}{\\partial x_n}\\right]^\\top
 
     Example
-        >>> gradient(lambda x: (x ** 2).sum(), torch.tensor([1., 2.])).round()  # f(x, y)  = x ** 2 + y ** 2
+        >>> # f(x, y)  = x ** 2 + y ** 2
+        >>> gradient(lambda x: (x ** 2).sum(), torch.tensor([1., 2.]))
             tensor([2., 4.], dtype=torch.float64)
 
     :param function: function which depends on n variables from x
@@ -62,8 +64,8 @@ def jacobian(f_vector: Sequence[Callable[[torch.Tensor], torch.Tensor]],
     .. math::
 
         {\\displaystyle J ={\\begin{bmatrix}{\\dfrac {\\partial f_{1}}{\\partial x_{1}}}&\\cdots
-          &{\\dfrac {\\partial f_{1}}{\\partial x_{n}}}\\\\\\vdots &\\ddots &\\vdots \\\\{\\dfrac {\\partial f_{m}}{\\partial x_{1}}}
-          &\\cdots &{\\dfrac {\\partial f_{m}}{\\partial x_{n}}}\\end{bmatrix}}}_{m \\times n}
+          &{\\dfrac {\\partial f_{1}}{\\partial x_{n}}}\\\\\\vdots &\\ddots &\\vdots \\\\{\\dfrac {\\partial f_{m}}
+          {\\partial x_{1}}}&\\cdots &{\\dfrac {\\partial f_{m}}{\\partial x_{n}}}\\end{bmatrix}}}_{m \\times n}
 
 
     >>> func_3 = [lambda x: x[0] ** 2 + x[1], lambda x: 2 * x[0] + 5 * x[1], lambda x: x[0] * x[1]]

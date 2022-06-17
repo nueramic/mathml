@@ -54,11 +54,11 @@ class BaseRegressionModel(torch.nn.Module):
 
         .. math::
 
-            \\hat Y_{n \\times 1} = X_{n \\times m} \\cdot W_{m \\times 1} + b_{n \\times 1} =
+            \\hat Y_{n \\times 1} = X_{n \\times m} \\cdot W_{m \\times 1} + b \\cdot I_{n \\times 1} =
             \\begin{bmatrix}
-            w_1 x_{1, 1} + w_2 x_{1, 2} + \\dots + w_m + x_{1, m} \\\\
+            w_1 x_{1, 1} + w_2 x_{1, 2} + \\dots + w_m + x_{1, m} + b\\\\
             \\vdots \\\\
-            w_1 x_{n, 1} + w_2 x_{n, 2} + \\dots + w_m + x_{n, m} \\\\
+            w_1 x_{n, 1} + w_2 x_{n, 2} + \\dots + w_m + x_{n, m} + b \\\\
             \\end{bmatrix}
 
         For non linear:
