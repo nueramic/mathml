@@ -444,7 +444,7 @@ class SVM(BaseClassification):
     def _fit_pegasos(self, x: torch.Tensor, y: torch.Tensor, epochs=20, lambda_reg: float = 0.95,
                      show_epoch: int = 0, print_function: Callable = print) -> torch.nn.Module:
         """
-        Returns trained model SVM [1]_
+        Returns trained model SVM [2]_
 
         :param x: training set
         :param y: target value
@@ -456,7 +456,7 @@ class SVM(BaseClassification):
 
         .. rubric:: References
 
-        .. [1] Pegasos: Primal Estimated sub-GrAdient SOlver for SVM. Shai Shalev-Shwartz; Yoram Singer; Nathan Srebro;
+        .. [2] Pegasos: Primal Estimated sub-GrAdient SOlver for SVM. Shai Shalev-Shwartz; Yoram Singer; Nathan Srebro;
                Andrew Cotter
 
         """
