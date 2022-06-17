@@ -7,7 +7,6 @@ if sys.version_info >= (3, 8):
     from typing import Literal
 else:
     from typing_extensions import Literal
-import numpy as np
 import torch
 
 
@@ -24,11 +23,11 @@ def check_tensors(*tensors: torch.Tensor) -> [torch.Tensor]:
         if arr is not None:
             assert isinstance(arr, torch.Tensor), 'arrays must be torch Tensor'
             arr = arr.flatten() 
-            shapes.append(arr.shape[0])
+            shapes.append(int(arr.shape[0]))
             
         output.append(arr)
     
-    assert len(np.unique(shapes)) == 1, 'Tensors must have same sizes'
+    assert len(torch.unique(torch.tensor(shapes))) == 1, 'Tensors must have same sizes'
 
     return output
 
@@ -137,9 +136,10 @@ def best_threshold(x: torch.Tensor, y_true: torch.Tensor, model: torch.nn.Module
     metric = {'f1': f_score, 'by_roc': lambda y1, y2: tpr(y1, y2) - fpr(y1, y2)}[metric]
     best_t = 0
     best_metric = 0
+    y_prob = model(x).flatten()
 
-    for threshold in np.arange(0, 1 + step_size, step_size):
-        y_prob = model(x).flatten()
+    for threshold in torch.arange(0, 1 + step_size, step_size):
+
         y_pred = (y_prob >= threshold) * 1
         metric_i = metric(y_true, y_pred)
 
