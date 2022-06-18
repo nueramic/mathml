@@ -27,6 +27,7 @@ some interesting features, for example, regression on stock prices or viewing gr
    modules/ml_regression.rst
    modules/ml_classification.rst
    modules/ml_metrics.rst
+   modules/visualize_animation.rst
 
 
 Indices and Tables

@@ -3,6 +3,9 @@ from __future__ import annotations
 import sys
 from typing import Dict, Union, Optional
 
+import plotly.express as px
+import plotly.graph_objects as go
+
 if sys.version_info >= (3, 8):
     from typing import Literal
 else:
@@ -22,11 +25,11 @@ def check_tensors(*tensors: torch.Tensor) -> [torch.Tensor]:
     for arr in tensors:
         if arr is not None:
             assert isinstance(arr, torch.Tensor), 'arrays must be torch Tensor'
-            arr = arr.flatten() 
+            arr = arr.flatten()
             shapes.append(int(arr.shape[0]))
-            
+
         output.append(arr)
-    
+
     assert len(torch.unique(torch.tensor(shapes))) == 1, 'Tensors must have same sizes'
 
     return output
@@ -235,8 +238,22 @@ def r2_score(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
     return float(1 - rss / tss)
 
 
-if __name__ == '__main__':
-    yt = torch.randint(0, 2, (10_000,))
-    yp = torch.rand((10_000,))
-    print(auc_roc(yt, yp))
-    print(binary_classification_report(yt, yt, yp))
+def roc_curve_plot(y_true: torch.Tensor, y_prob: torch.Tensor, fill: bool = False) -> go.Figure:
+    """
+    Return figure with plotly.Figure ROC curve
+
+    :param y_true: array with true values of binary classification
+    :param y_prob: array of probabilities of confidence of belonging to the 1st class
+    :param fill: flag for filling the area under the curve
+    :return: go.Figure
+    """
+    if fill:
+        fig = px.area(roc_curve(y_true, y_prob, None if len(y_true) < 1000 else 1000), x='FPR', y='TPR',
+                      title='<b>ROC curve</b>')
+    else:
+        fig = px.line(roc_curve(y_true, y_prob, None if len(y_true) < 1000 else 1000), x='FPR', y='TPR',
+                      title='<b>ROC curve</b>')
+
+    fig.update_layout(font={'size': 18}, autosize=False, width=700, height=600)
+    fig.add_scatter(x=[0, 1], y=[0, 1], mode='lines', line={'dash': 'dash'}, showlegend=False)
+    return fig

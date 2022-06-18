@@ -219,6 +219,7 @@ def successive_parabolic_interpolation(function: Callable[[float | torch.Tensor]
     f1 = type_opt_const * function(x1)
     f2 = type_opt_const * function(x2)
     f_x: dict = {x0: f0, x1: f1, x2: f2}
+    count_upd_point: int = 0  # if the numerator or denominator is zero, we will choose a new point. max of 100 times
     x2, x1, x0 = sorted([x0, x1, x2], key=lambda x: f_x[x])
 
     if keep_history:
@@ -237,12 +238,15 @@ def successive_parabolic_interpolation(function: Callable[[float | torch.Tensor]
             p = (x1 - x2) ** 2 * (f2 - f0) + (x0 - x2) ** 2 * (f1 - f2)
             q = 2 * ((x1 - x2) * (f2 - f0) + (x0 - x2) * (f1 - f2))
 
-            if p == 0:
-                print('Searching finished. Select an another initial state. Numerator is zero. code 2')
-                return x2, history
-            if q == 0:
-                print('Searching finished. Select an another initial state. Denominator is zero. code 2')
-                return x2, history
+            if p == 0 or q == 0:
+                if count_upd_point >= 100:
+                    print('Select an another initial state. Numerator or Denominator is zero. code 2')
+                    return x2, history
+                else:
+                    count_upd_point += 1
+                    x2 = float(torch.rand(1) * (abs(x0 - x1)) * min(x0, x1))
+                    f_x[x2] = function(x2)
+                    continue
 
             x_new = x2 + p / q
 

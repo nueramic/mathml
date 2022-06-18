@@ -34,10 +34,11 @@
          <img alt="two logos" src="docs/_static/nueramic-logo-cropped-black.svg">
        </picture>
        </p>
-   
+
+
 Nueramic MathML
 ===============
-Nueramic-mathml is a library for visualizing and logging the steps of basic optimization algorithms in machine learning. The project uses torch for calculations and plotly for visualization.
+Nueramic-mathml is a library for visualizing and logging the steps of optimization algorithms in machine learning. The project uses torch for calculations and plotly for visualization.
 
 .. code-block:: python
 
@@ -54,9 +55,9 @@ Also available multidimensional optimisation.
 
 .. code-block:: python
 
-    >>> def f(x): return x ** 3 - x ** 2 - x  # Minimum at x = 1
-    >>> bounds = (0, 3)
-    >>> one_optimize.golden_section_search(f, bounds, epsilon=0.01, verbose=True)[0]
+    def f(x): return x ** 3 - x ** 2 - x  # Minimum at x = 1
+    bounds = (0, 3)
+    one_optimize.golden_section_search(f, bounds, epsilon=0.01, verbose=True)[0]
 
     Iteration: 0 	|	 point = 1.500 	|	 f(point) = -0.375
     Iteration: 1 	|	 point = 0.927 	|	 f(point) = -0.990
@@ -78,12 +79,12 @@ You can use our models for classification and regression
 
 .. code-block:: python
 
-    >>> from nueramic_mathml.ml import LogisticRegressionRBF
-    >>> from sklearn.datasets import make_moons
+    from nueramic_mathml.ml import LogisticRegressionRBF
+    from sklearn.datasets import make_moons
 
-    >>> x, y = make_moons(10_000, noise=.1, random_state=84)
-    >>> x, y = torch.tensor(x), torch.tensor(y)
-    >>> logistic_model_rbf = LogisticRegressionRBF(x[:1000]).fit(x, y, show_epoch=10)
+    x, y = make_moons(10_000, noise=.1, random_state=84)
+    x, y = torch.tensor(x), torch.tensor(y)
+    logistic_model_rbf = LogisticRegressionRBF(x[:1000]).fit(x, y, show_epoch=10)
 
     Epoch:     1 | CrossEntropyLoss:  0.71496
     Epoch:    12 | CrossEntropyLoss:  0.35328
@@ -96,7 +97,7 @@ You can use our models for classification and regression
     Epoch:    89 | CrossEntropyLoss:  0.11724
     Epoch:   100 | CrossEntropyLoss:  0.10629
 
-    >>> logistic_model_rbf.metrics_tab(x, y)
+    logistic_model_rbf.metrics_tab(x, y)
 
     {'auc_roc': 0.9974513817072977,
      'f1': 0.9700730618209839,
