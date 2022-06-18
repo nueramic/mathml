@@ -8,7 +8,7 @@ import torch
 
 from .calculus import gradient, hessian, jacobian
 from .one_optimize import brent
-from .support import HistoryBFGS, HistoryGD, update_history_gd, HiddenPrints, print_verbose
+from .support import HistoryGD, update_history_gd, HiddenPrints, print_verbose
 
 
 def initialize(function: Callable[[torch.Tensor], torch.Tensor],
@@ -35,8 +35,8 @@ def initialize(function: Callable[[torch.Tensor], torch.Tensor],
         history: HistoryGD = {
             'iteration': [0],
             'f_value': [func_k],
-            'f_grad_norm': [(grad_k ** 2).sum() ** 0.5],
-            'x': [x_k],
+            'f_grad_norm': [grad_k.norm(2)],
+            'x': [x_k.flatten()],
             'message': ''
         }
 
@@ -51,7 +51,7 @@ def bfgs(function: Callable[[torch.Tensor], torch.Tensor],
          tolerance: float = 1e-8,
          max_iter: int = 500,
          verbose: bool = False,
-         keep_history: bool = False) -> Tuple[torch.Tensor, HistoryBFGS]:
+         keep_history: bool = False) -> Tuple[torch.Tensor, HistoryGD]:
     """
     Returns a tensor n x 1 with optimal point and history using the BFGS method [1]_
 
@@ -89,7 +89,7 @@ def bfgs(function: Callable[[torch.Tensor], torch.Tensor],
 
     # initialization
     x_k, func_k, grad_k, history, round_precision = initialize(function, x0, tolerance, keep_history)
-    h_k = torch.eye(x_k.shape[0], dtype=torch.float64) * tolerance ** 0.5
+    h_k = torch.eye(x_k.shape[0], dtype=torch.float64) * tolerance ** 0.1
     grad_k = grad_k.reshape(-1, 1)
     x_k = x_k.reshape(-1, 1)
 
@@ -98,9 +98,8 @@ def bfgs(function: Callable[[torch.Tensor], torch.Tensor],
 
     try:
         for i in range(max_iter):
-
             # stop criterion
-            if (grad_k ** 2).sum() ** 0.5 < tolerance:
+            if grad_k.norm(2) < tolerance:
                 history['message'] = 'Searching finished. Successfully. code 0'
                 return x_k.reshape(-1), history
 
@@ -114,14 +113,14 @@ def bfgs(function: Callable[[torch.Tensor], torch.Tensor],
 
             # step
             x_k_plus1 = x_k + alpha_k * p_k
-            grad_f_k_plus1 = gradient(function, x_k_plus1).reshape(-1, 1)
+            grad_f_k_plus1 = gradient(function, x_k_plus1, delta_x=1e-1).reshape(-1, 1)
             s_k = x_k_plus1 - x_k
             y_k = grad_f_k_plus1 - grad_k
 
             h_k = calc_h_new(h_k, s_k, y_k)
             grad_k = grad_f_k_plus1
             x_k = x_k_plus1
-            func_k = function(x_k)
+            func_k = function(x_k.flatten())
 
             # check divergence
             if torch.isnan(x_k).any():
@@ -133,12 +132,13 @@ def bfgs(function: Callable[[torch.Tensor], torch.Tensor],
 
             # history
             if keep_history:
-                history = update_history_gd(history, values=[i + 1, func_k, (grad_k ** 2).sum() ** 0.5, x_k])
+                history = update_history_gd(history, values=[i + 1, func_k, grad_k.norm(2), x_k.flatten()])
+        else:
+            history['message'] = 'Searching finished. Max iterations have been reached. code 1'
 
     except Exception as e:
         history['message'] = f'Optimization failed. {e}. code 2'
 
-    history['message'] = 'Searching finished. Max iterations have been reached. code 1'
     return x_k.flatten(), history
 
 
