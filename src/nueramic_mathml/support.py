@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import Text, Tuple, Sequence, Any
+from typing import Text, Sequence, Any
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict, Literal  # pylint: disable=no-name-in-module
@@ -53,12 +53,6 @@ class HistoryBrent(TypedDict):
     type_step: list[Text]
 
 
-class HistoryBFGS(TypedDict):
-    iteration: list[float]
-    point: list[Tuple]
-    function: list[float]
-
-
 def update_history_brent(history: HistoryBrent, values: Sequence[Any]) -> HistoryBrent:
     """
     Updates brent history
@@ -101,7 +95,7 @@ class HistoryGD(TypedDict):
     iteration: list
     f_value: list
     f_grad_norm: list
-    x: list[Sequence]
+    x: list[torch.Tensor]
     message: Text
 
 
@@ -109,7 +103,7 @@ def update_history_gd(history: HistoryGD, values: list) -> HistoryGD:
     """
     Update HistoryMDO with values, which contains iteration, f_value, f_grad_norm, x as a list
 
-    :param history: object of HistoryMDO
+    :param history: object of HistoryGD
     :param values: new values that need to append in history in order iteration, f_value, f_grad_norm, x
     :return: updated history
     """
