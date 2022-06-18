@@ -43,12 +43,6 @@ def golden_section_search(function: Callable[[float | torch.Tensor], float],
     .. note::
         If optimization fails golden_section_search will return the last point
 
-    Code example:
-
-    .. code-block:: python3
-
-        >>> def func(x): return 2.71828 ** (3 * x) + 5 * 2.71828 ** (-2 * x)
-        >>> point, data = golden_section_search(func, (-10, 10), type_optimization='min', keep_history=True)
 
     .. rubric:: References
 
@@ -67,6 +61,12 @@ def golden_section_search(function: Callable[[float | torch.Tensor], float],
     :param keep_history: flag of return history
     :return: tuple with point and history.
 
+    .. rubric:: Examples
+
+    .. code-block:: python3
+
+        >>> def func(x): return 2.71828 ** (3 * x) + 5 * 2.71828 ** (-2 * x)
+        >>> point, data = golden_section_search(func, (-10, 10), type_optimization='min', keep_history=True)
     """
     phi: float = (1 + 5 ** 0.5) / 2
 
@@ -168,7 +168,25 @@ def successive_parabolic_interpolation(function: Callable[[float | torch.Tensor]
     :math:`\\rule{125mm}{0.7pt} \\\\`
 
 
-    Example:
+    ..  [3] Press, William H., Teukolsky, S. A., Vetterling, W. T., & Flannery, B. P. (2007).
+        Numerical Recipes with Source Code CD-ROM 3rd Edition: The Art of Scientific Computing (3rd ed.).
+        Cambridge University Press. p.496-499
+
+    :math:`\\rule{125mm}{0.2pt} \\\\`
+
+    :param function: callable that depends on the first positional argument. Other arguments are passed through kwargs
+    :param bounds: tuple with two numbers. This is left and right bound optimization. [a, b]
+    :param epsilon: optimization accuracy
+    :param type_optimization: 'min' / 'max' - type of required value
+    :param max_iter: maximum number of iterations
+    :param verbose: flag of printing iteration logs
+    :param keep_history: flag of return history
+    :return: tuple with point and history.
+
+    .. rubric:: Examples
+
+    .. code-block:: python3
+
         >>> def func1(x): return x ** 3 - x ** 2 - x
         >>> successive_parabolic_interpolation(func1, (0, 1.5), verbose=True)
         Iteration: 0	|	x2 = 0.750	|	f(x2) = -0.891
@@ -185,22 +203,6 @@ def successive_parabolic_interpolation(function: Callable[[float | torch.Tensor]
         Iteration: 2	|	x2 = 0.961	|	f(x2) =  0.997
         Iteration: 3	|	x2 = 1.017	|	f(x2) =  0.999
         ...
-
-    ..  [3] Press, William H., Teukolsky, S. A., Vetterling, W. T., & Flannery, B. P. (2007).
-        Numerical Recipes with Source Code CD-ROM 3rd Edition: The Art of Scientific Computing (3rd ed.).
-        Cambridge University Press. p.496-499
-
-    :math:`\\rule{125mm}{0.2pt} \\\\`
-
-    :param function: callable that depends on the first positional argument. Other arguments are passed through kwargs
-    :param bounds: tuple with two numbers. This is left and right bound optimization. [a, b]
-    :param epsilon: optimization accuracy
-    :param type_optimization: 'min' / 'max' - type of required value
-    :param max_iter: maximum number of iterations
-    :param verbose: flag of printing iteration logs
-    :param keep_history: flag of return history
-    :return: tuple with point and history.
-
     """
     type_optimization = type_optimization.lower().strip()
     assert type_optimization in ['min', 'max'], 'Invalid type optimization. Enter "min" or "max"'
@@ -342,6 +344,28 @@ def brent(function: Callable[[float | torch.Tensor], float],
     :param verbose: flag of printing iteration logs
     :param keep_history: flag of return history
     :return: tuple with point and history.
+
+
+    .. rubric:: Examples
+
+    .. code-block:: python3
+
+        >>> brent(lambda x: x ** 3 - x ** 2 - x, (0,2), verbose=True)[0]
+        iteration 0	x = 0.763932,	f(x) = -0.901699	type : initial
+        iteration 1	x = 0.763932,	f(x) = -0.901699	type : golden
+        iteration 2	x = 0.763932,	f(x) = -0.901699	type : golden
+        iteration 3	x = 0.944272,	f(x) = -0.993962	type : golden
+        iteration 4	x = 0.944272,	f(x) = -0.993962	type : golden
+        iteration 5	x = 0.999120,	f(x) = -0.999998	type : parabolic
+        iteration 6	x = 0.999223,	f(x) = -0.999999	type : parabolic
+        iteration 7	x = 0.999223,	f(x) = -0.999999	type : golden
+        iteration 8	x = 0.999992,	f(x) = -1.000000	type : parabolic
+        iteration 9	x = 1.000002,	f(x) = -1.000000	type : parabolic
+        iteration 10	x = 1.000002,	f(x) = -1.000000	type : golden
+        iteration 11	x = 1.000002,	f(x) = -1.000000	type : parabolic
+        Searching finished. Successfully. code 0
+        1.0000016327177492
+
 
     """
 

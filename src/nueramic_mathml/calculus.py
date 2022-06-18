@@ -26,10 +26,6 @@ def gradient(function: Callable[[torch.Tensor], torch.Tensor], x0: torch.Tensor,
          \\frac{\\partial f}{\\partial x_2}
          \\enspace \\dots \\enspace \\frac{\\partial f}{\\partial x_n}\\right]^\\top
 
-    Example
-        >>> # f(x, y)  = x ** 2 + y ** 2
-        >>> gradient(lambda x: (x ** 2).sum(), torch.tensor([1., 2.]))
-            tensor([2., 4.], dtype=torch.float64)
 
     :param function: function which depends on n variables from x
     :param x0: n x 1 - dimensional array :math:`\\in \\mathbb{R}^{n}`. dtype is torch.double (float64)
@@ -38,6 +34,14 @@ def gradient(function: Callable[[torch.Tensor], torch.Tensor], x0: torch.Tensor,
 
     .. note::
         If we make delta_x :math:`\\leq` 1e-4 gradient will return values with large error rate
+
+    .. rubric:: Examples
+
+    .. code-block:: python3
+
+        >>> # f(x, y)  = x ** 2 + y ** 2
+        >>> gradient(lambda x: (x ** 2).sum(), torch.tensor([1., 2.]))
+            tensor([2., 4.], dtype=torch.float64)
 
     """
     assert isinstance(x0, torch.Tensor), 'x0 must be torch.Tensor'
@@ -68,16 +72,20 @@ def jacobian(f_vector: Sequence[Callable[[torch.Tensor], torch.Tensor]],
           {\\partial x_{1}}}&\\cdots &{\\dfrac {\\partial f_{m}}{\\partial x_{n}}}\\end{bmatrix}}}_{m \\times n}
 
 
-    >>> func_3 = [lambda x: x[0] ** 2 + x[1], lambda x: 2 * x[0] + 5 * x[1], lambda x: x[0] * x[1]]
-    >>> print(jacobian(func_3, torch.tensor([-1, 2])).round())
-    tensor([[-2.,  1.],
-            [ 2.,  5.],
-            [ 2., -1.]], dtype=torch.float64)
-
     :param f_vector: a flat sequence, list or tuple or other containing m functions
     :param x0: an n-dimensional array. The specific point at which we will calculate the Jacobian
     :param delta_x: precision of gradient
     :return: the Jacobian matrix according to the above formula. Matrix n x m
+
+    .. rubric:: Examples
+
+    .. code-block:: python3
+
+        >>> func_3 = [lambda x: x[0] ** 2 + x[1], lambda x: 2 * x[0] + 5 * x[1], lambda x: x[0] * x[1]]
+        >>> print(jacobian(func_3, torch.tensor([-1, 2])).round())
+        tensor([[-2.,  1.],
+                [ 2.,  5.],
+                [ 2., -1.]], dtype=torch.float64)
     """
     assert isinstance(f_vector, Sequence), 'f_vector must be sequence'
     jac = torch.zeros(len(f_vector), x0.flatten().shape[0], dtype=torch.float64)
@@ -105,10 +113,6 @@ def hessian(function: Callable[[torch.Tensor], torch.Tensor], x0: torch.Tensor, 
 
 
 
-    >>> def paraboloid(x): return x[0] ** 2 + 2 * x[1] ** 2
-    >>> print(hessian(paraboloid, torch.tensor([1, 1])).round())
-    [[2. 0.]
-     [0. 4.]]
 
     :param function: function which depends on n variables from x
     :param x0: n - dimensional array
@@ -118,6 +122,16 @@ def hessian(function: Callable[[torch.Tensor], torch.Tensor], x0: torch.Tensor, 
     .. note::
         If we make delta_x :math:`\\leq` 1e-4 hessian returns matrix with large error rate
 
+
+
+    .. rubric:: Examples
+
+    .. code-block:: python3
+
+        >>> def paraboloid(x): return x[0] ** 2 + 2 * x[1] ** 2
+        >>> print(hessian(paraboloid, torch.tensor([1, 1])).round())
+        [[2. 0.]
+         [0. 4.]]
     """
     delta_x = max(delta_x, 1e-4)  # Check note
     x0: torch.Tensor = x0.flatten().double()
