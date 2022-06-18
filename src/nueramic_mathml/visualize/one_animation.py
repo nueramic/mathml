@@ -84,19 +84,17 @@ def gen_animation_gss(func: Callable,
     """
     Generates an animation of the golden-section search on `func` between the `bounds`
 
+    :param func: callable that depends on the first positional argument
+    :param bounds: tuple with left and right points on the x-axis
+    :param history: a history object. a dict with lists. keys iteration, f_value, middle_point, left_point, right_point
+    :return: go.Figure with graph
+
     .. code-block:: python3
 
         >>> def f(x): return x ** 3 - x ** 2 - x
         >>> _, h = golden_section_search(f, (0, 2), keep_history=True)
         >>> gen_animation_gss(f, (0, 2), h)
 
-    .. image:: ../../docs/_static/vis_gifs/golden_section_example.gif
-
-    :param func: callable that depends on the first positional argument
-    :param bounds: tuple with left and right points on the x-axis
-    :param history: a history object. a dict with lists. keys iteration, f_value, middle_point, left_point, right_point
-
-    :return: go.Figure with graph
     """
     x_axis = np.linspace(bounds[0], bounds[1], 500)
     f_axis = np.zeros_like(x_axis)
@@ -132,17 +130,16 @@ def gen_animation_spi(func: Callable[[float], float],
     """
     Generate animation. Per each iteration we create a go.Frame with parabola plot passing through three points
 
+    :param history: a history object. a dict with lists. keys iteration, f_value, middle_point, left_point, right_point
+    :param bounds: tuple with left and right points on the x-axis
+    :param func: the functions for which the story was created
+
     .. code-block:: python3
 
         >>> def f(x): return x ** 3 - x ** 2 - x
         >>> _, h = successive_parabolic_interpolation(f, (0, 2), keep_history=True)
         >>> gen_animation_spi(f, (0, 2), h)
 
-    .. image:: ../../docs/_static/vis_gifs/successive_parabolic_example.gif
-
-    :param history: a history object. a dict with lists. keys iteration, f_value, middle_point, left_point, right_point
-    :param bounds: tuple with left and right points on the x-axis
-    :param func: the functions for which the story was created
     """
 
     n = len(history['iteration'])
@@ -158,7 +155,7 @@ def gen_animation_spi(func: Callable[[float], float],
     f_range = [min(f_axis) - diff_f * 0.25, max(f_axis) + diff_f * 0.25]
 
     history = pd.DataFrame(history)
-    a, b, c = make_parabolic_function(
+    a, b, c = parabolic_coefficients(
         history.loc[0, 'x0'],
         history.loc[0, 'x1'],
         history.loc[0, 'x2'],
@@ -198,11 +195,11 @@ def gen_animation_spi(func: Callable[[float], float],
     frames = []
 
     x0, x1, x2 = history.loc[0, ['x0', 'x1', 'x2']].values
-    a, b, c = make_parabolic_function(x0, x1, x2, func)
+    a, b, c = parabolic_coefficients(x0, x1, x2, func)
     parabola_pre = float(a) * x_axis ** 2 + float(b) * x_axis + float(c)
     for i in range(0, history.shape[0]):
         x0, x1, x2 = history.loc[i, ['x0', 'x1', 'x2']].values
-        a, b, c = make_parabolic_function(x0, x1, x2, func)
+        a, b, c = parabolic_coefficients(x0, x1, x2, func)
 
         parabola_new = float(a) * x_axis ** 2 + float(b) * x_axis + float(c)
         frames.append(go.Frame({
@@ -239,13 +236,13 @@ def gen_animation_spi(func: Callable[[float], float],
     return fig
 
 
-def make_parabolic_function(x0: float, x1: float, x2: float, func: Callable[[float], float]) -> [float, float, float]:
+def parabolic_coefficients(x0: float, x1: float, x2: float, func: Callable[[float], float]) -> [float, float, float]:
     """
-    Returns a parabolic function passing through the specified points x0, x1, x2
+    Returns a parabolic function passing through the specified points x0, x1, x2 coeficients
 
     .. code-block:: python3
 
-        >>> make_parabolic_function(0, 1, 2, lambda x: x ** 2)
+        >>> parabolic_coefficients(0, 1, 2, lambda x: x ** 2)
         (1.0, 0.0, 0.0)
 
     .. math::
@@ -324,7 +321,7 @@ def _make_parabolic_frame(x: list[float, float, float],
     :param i: frame's number
     :return: one frame of successive parabolic step
     """
-    a, b, c = make_parabolic_function(*x, func=func)
+    a, b, c = parabolic_coefficients(*x, func=func)
     x = sorted(list(x), key=func, reverse=True)
     fx = list(map(func, x))
     x_axis = func_plot.x
@@ -480,21 +477,20 @@ def _make_layout(n: int, x_range: list[float, float], f_range: list[float, float
     return layout
 
 
-def gen_animation_brent(history: HistoryBrent, func: Callable[[float], float]) -> go.Figure:
+def gen_animation_brent(func: Callable[[float], float], history: HistoryBrent) -> go.Figure:
     """
     Returns a visualization of the Brent algorithm. Each iteration shows which iteration.
+
+    :param func: callable that depends on the first positional argument
+    :param history: brent optimization history
+    :return: animation of optimization
 
     .. code-block:: python3
 
         >>> def f(x): return x ** 3 - x ** 2 - x
         >>> _, h = brent(f, (0, 2), keep_history=True)
-        >>> gen_animation_brent(h, f)
+        >>> gen_animation_brent(f, h)
 
-    .. image:: ../../docs/_static/vis_gifs/brent_example.gif
-
-    :param history: brent optimization history
-    :param func: callable that depends on the first positional argument
-    :return: animation of optimization
     """
 
     # x bounds
