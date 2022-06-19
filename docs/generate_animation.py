@@ -1,4 +1,4 @@
-from sklearn.datasets import make_moons
+from sklearn.datasets import make_moons, make_regression
 
 from src.nueramic_mathml.visualize.ml_animation import *
 from src.nueramic_mathml.visualize.multi_animation import *
@@ -52,6 +52,19 @@ def make_htmls(type_anim: str = 'gss'):
         yp = torch.tensor([0.7, 0.6, 0.3, 0.5, 0.4, 0.4])
         fig = roc_curve_plot(yt, yp)
 
+    elif type_anim == 'linear':
+
+        x, y = make_regression(200, 1, noise=20, random_state=21)
+        x, y = torch.tensor(x), torch.tensor(y)
+        regression = LinearRegression().fit(x, y)
+        fig = gen_regression_plot(x, y, regression)
+
+    elif type_anim == 'linear4d':
+        x, y = make_regression(200, 4, noise=20, random_state=21)
+        x, y = torch.tensor(x), torch.tensor(y)
+        regression = LinearRegression().fit(x, y)
+        fig = gen_regression_plot(x, y, regression)
+
     else:
         return
 
@@ -89,3 +102,5 @@ make_htmls('bfgs')
 make_htmls('optim')
 make_htmls('rbf')
 make_htmls('roc_curve')
+make_htmls('linear')
+make_htmls('linear4d')
