@@ -25,7 +25,10 @@ __all__ = [
     "constrained_lagrangian_solver",
     "ml",
     "metrics",
-    "visualize"
+    "visualize",
+    "calculus",
+    "multi_optimize",
+    "one_optimize"
 ]
 
-__version__ = '1.0 dev 2022 ))) Hi'
+__version__ = '1.0 dev 2048 ))) Hi'
