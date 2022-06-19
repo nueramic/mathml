@@ -24,7 +24,8 @@ __all__ = [
     "log_barrier_solver",
     "constrained_lagrangian_solver",
     "ml",
-    "metrics"
+    "metrics",
+    "visualize"
 ]
 
-__version__ = '1.0 dev 2001 ))) Hi'
+__version__ = '1.0 dev 2022 ))) Hi'
