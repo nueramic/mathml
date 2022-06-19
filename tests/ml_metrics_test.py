@@ -1,9 +1,8 @@
 import pytest
 import torch
 
-from src.nueramic_mathml.ml.metrics import binary_classification_report, precision, recall, accuracy, auc_roc, f_score, \
-    r2_score
-
+from src.nueramic_mathml.ml.metrics import binary_classification_report, precision, recall, accuracy, \
+    auc_roc, f_score, r2_score
 
 binary_classification_report_tests = [
     (
@@ -13,6 +12,7 @@ binary_classification_report_tests = [
         {
             'recall': 2 / 3,
             'precision': 1,
+            'accuracy': 3 / 4,
             'f1': 0.8,
             'auc_roc': 1.0
         }  # actual report
@@ -25,6 +25,7 @@ binary_classification_report_tests = [
         {
             'recall': 1,
             'precision': 1,
+            'accuracy': 1,
             'f1': 1,
             'auc_roc': 1.0
         }
@@ -55,7 +56,6 @@ def test_precision(y_true, y_pred, expected_recall, expected_precision, expected
 
 @pytest.mark.parametrize('y_true, y_pred, expected_recall, expected_precision, expected_accuracy', precision_tests)
 def test_recall(y_true, y_pred, expected_recall, expected_precision, expected_accuracy):
-
     assert recall(y_true, y_pred) == pytest.approx(expected_recall, rel=1e-5)
 
 
@@ -84,20 +84,21 @@ f_tests = [
     (torch.tensor([1, 0, 1, 1]), torch.tensor([0, 1, 0, 0]), 0),
     (torch.tensor([1, 1, 1, 1]), torch.tensor([1, 1, 0, 1]), 6 / 7),
     (torch.zeros(10_000), torch.ones(10_000), 0)
-     ]
+]
 
 
 @pytest.mark.parametrize('y_true, y_pred, expected_f', f_tests)
 def test_f(y_true, y_pred, expected_f):
     assert f_score(y_true, y_pred) == pytest.approx(expected_f)
 
+
 r_tests = [
-    (torch.tensor([1, 0, 1, 1]), torch.tensor([1, 0, 0, 1]),  -1 / 3),  # basic test
-    (torch.tensor([1, 0, 1, 1]), torch.tensor([1, 1, 1, 1]),  -1 / 3),
+    (torch.tensor([1, 0, 1, 1]), torch.tensor([1, 0, 0, 1]), -1 / 3),  # basic test
+    (torch.tensor([1, 0, 1, 1]), torch.tensor([1, 1, 1, 1]), -1 / 3),
     (torch.tensor([3, -0.5, 2, 7]), torch.tensor([2.5, 0.0, 2, 8]), 0.948)
 ]
 
 
 @pytest.mark.parametrize('y_true, y_pred, expected_r', r_tests)
-def test_r(y_true, y_pred,  expected_r):
+def test_r(y_true, y_pred, expected_r):
     assert r2_score(y_true, y_pred) == pytest.approx(expected_r, rel=1e-3)
