@@ -207,13 +207,14 @@ def binary_classification_report(y_true: torch.Tensor,
     :param y_true: array with true values of binary classification
     :param y_pred: array with prediction values of binary classification
     :param y_prob: array of probabilities of confidence of belonging to the 1st class
-    :return: float value of area under roc-curve
+    :return: dict with 5 metrics
     """
     check_tensors(y_true, y_pred, y_prob)
 
     return {
         'recall': recall(y_true, y_pred),
         'precision': precision(y_true, y_pred),
+        'accuracy': accuracy(y_true, y_pred),
         'f1': f_score(y_true, y_pred),
         'auc_roc': None if y_prob is None else auc_roc(y_true, y_prob)
     }
@@ -227,14 +228,20 @@ def r2_score(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
 
         \\mathbf{R}^{2} = 1 - \\frac{\\sum_{i=1}^{n}(\\hat y_i - y_i)^2}{\\sum_{i = 1}^{n}(\\hat y_i - \\overline y)^2}
 
-    :param y_true: array with true values of binary classification
-    :param y_pred: array with prediction values of binary classification
-    :return:
+    .. note::
+
+        if std(y_true) = 0, then r2 = 0
+
+    :param y_true: array with true values of regression
+    :param y_pred: array with prediction values of regression
+    :return: r2 metric in float number
     """
     y_true, y_pred = check_tensors(y_true, y_pred)
     y_true, y_pred = y_true.float(), y_pred.float()
     rss = (y_true - y_pred).norm(2) ** 2
     tss = (y_true - y_true.mean()).norm(2) ** 2
+    if tss < 1e-12:
+        return 0
 
     return float(1 - rss / tss)
 
@@ -265,3 +272,89 @@ def roc_curve_plot(y_true: torch.Tensor, y_prob: torch.Tensor, fill: bool = Fals
     fig.update_layout(font={'size': 18}, autosize=False, width=700, height=600, xaxis={'range': [-0.05, 1.05]})
     fig.add_scatter(x=[0, 1], y=[0, 1], mode='lines', line={'dash': 'dash'}, name='', showlegend=False)
     return fig
+
+
+def mse(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
+    """
+    Returns MSE
+
+    .. math::
+
+        \\mathbf{MSE}^{2} = \frac{1}{n}\\sum_{i=1}^{n}(\\hat y_i - y_i)^2}
+
+    :param y_true: array with true values of regression
+    :param y_pred: array with prediction values of regression
+    :return: mse metric in float number
+    """
+    y_true, y_pred = check_tensors(y_true, y_pred)
+    y_true, y_pred = y_true.float(), y_pred.float()
+    _mse = ((y_true - y_pred) ** 2).mean()
+
+    return float(_mse)
+
+
+def mae(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
+    """
+    Returns MAE
+
+    .. math::
+
+        \\mathbf{MSE}^{2} = \frac{1}{n}\\sum_{i=1}^{n}|\\hat y_i - y_i|
+
+    :param y_true: array with true values of regression
+    :param y_pred: array with prediction values of regression
+    :return: mae metric in float number
+    """
+    y_true, y_pred = check_tensors(y_true, y_pred)
+    y_true, y_pred = y_true.float(), y_pred.float()
+    _mae = (y_true - y_pred).abs().mean()
+
+    return float(_mae)
+
+
+def mape(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
+    """
+    Returns MAPE
+
+    .. math::
+
+        \\displaystyle \\mathbf{MAPE}= \\frac{100}{n}}\\sum _{i=1}^{n}\\left|{\\frac{A_{i}-F_{i}}{A_{t}}}\\right|}
+
+    .. note::
+
+        All values in y_true that are less than 1e-10 in absolute value will be replaced by 1e-10
+
+    :param y_true: array with true values of regression
+    :param y_pred: array with prediction values of regression
+    :return: mape metric in float number
+    """
+    y_true, y_pred = check_tensors(y_true, y_pred)
+    y_true, y_pred = y_true.float(), y_pred.float()
+
+    numerator = (y_true - y_pred).abs()
+
+    y_true = y_true.abs()
+    y_true[y_true < 1e-10] = 1e-10
+
+    _mape = (numerator / y_true).mean() * 100
+
+    return float(_mape)
+
+
+def regression_report(y_true: torch.Tensor,
+                      y_pred: torch.Tensor) -> dict:
+    """
+    Returns dict with recall, precision, accuracy, f1, auc roc scores
+
+    :param y_true: array with true values of binary classification
+    :param y_pred: array with prediction values of binary classification
+    :return: dict with 4 metrics
+    """
+    check_tensors(y_true, y_pred)
+
+    return {
+        'r2': r2_score(y_true, y_pred),
+        'mae': mae(y_true, y_pred),
+        'mse': mse(y_true, y_pred),
+        'mape': mape(y_true, y_pred),
+    }
