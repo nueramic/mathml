@@ -113,8 +113,8 @@ regression/classification models.
 
        <p align="center">
        <picture align="center">
-         <source width=150px" media="(prefers-color-scheme: dark)" srcset="docs/_static/charts/RBF-animation-light.html">
-         <source width=150px" media="(prefers-color-scheme: light)" srcset="docs/_static/charts/RBF-animation-dark.html">
+         <source width=800px" media="(prefers-color-scheme: dark)" srcset="docs/_static/charts/RBF-animation-light.svg">
+         <source width=800px" media="(prefers-color-scheme: light)" srcset="docs/_static/charts/RBF-animation-dark.svg">
          <img alt="rbf" src="docs/_static/nueramic-logo-cropped-black.svg">
        </picture>
        </p>
