@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import gc
 from typing import Optional
 
 import plotly.express as px
@@ -7,7 +8,7 @@ import plotly.graph_objs as go
 import torch
 from sklearn.manifold import TSNE
 
-from .one_animation import standard_layout
+from .one_animation import standard_layout, COLOR3, COLOR5
 from ..ml.classification import LogisticRegressionRBF
 from ..ml.metrics import roc_curve_plot
 
@@ -62,6 +63,7 @@ def gen_classification_plot(x_tensor: torch.Tensor,
 
         {'recall': 0.9980000257492065,
          'precision': 0.9842209219932556,
+         'accuracy': 0.9909999966621399,
          'f1': 0.9910625822119956,
          'auc_roc': 0.9995800006320514}
 
@@ -76,7 +78,7 @@ def gen_classification_plot(x_tensor: torch.Tensor,
         raise AssertionError('x.shape[1] must be >= 2')
 
     elif x_tensor.shape[1] == 2:
-        title = '<b>Initial Distribution</b>' if title is None else title
+        title = '<b>Initial Distribution</b>' if title is None else f'<b>{title}</b>'
         fig = px.scatter(x=x_tensor[:, 0], y=x_tensor[:, 1], title=title, color=colors)
 
         if model is not None:
@@ -89,9 +91,19 @@ def gen_classification_plot(x_tensor: torch.Tensor,
             x2 = torch.tensor([x_tensor[:, 0].max() + dx * k,
                                x_tensor[:, 1].max() + dy * k])
 
-            flag, grid = _make_line_linear((x1[0] + dx * k / 2, x2[0] - dx * k / 2), model, threshold)
+            flag, grid = _make_line_linear((x1[0], x2[0]), model, threshold)
 
-            if not flag:
+            if flag:
+                mask = (
+                        (grid[:, 0] >= x1[0] + dx * k) &
+                        (grid[:, 0] <= x2[0] - dx * k) &
+                        (grid[:, 1] >= x1[1] + dy * k) &
+                        (grid[:, 1] <= x2[1] - dx * k)
+                )
+
+                grid = grid[mask, :]
+            else:
+
                 grid = _make_line(x1, x2, model, threshold, cnt_points, epsilon, insert_na)
 
             line_x, line_y = grid.detach().cpu().T
@@ -104,7 +116,8 @@ def gen_classification_plot(x_tensor: torch.Tensor,
         fig = px.scatter(x=tsne_x[:, 0], y=tsne_x[:, 1], title=title, color=colors)
 
     fig.update_layout(**standard_layout)
-
+    fig.update_layout({'xaxis_title': r'<b>x1</b>', 'yaxis_title': r'<b>x2</b>'})
+    gc.collect()
     return fig
 
 
@@ -223,3 +236,55 @@ def _make_line_linear(bounds_x: tuple[float, float],
         return False, None
 
     return True, torch.stack([x, y]).T
+
+
+def gen_regression_plot(x_tensor: torch.Tensor,
+                        y: torch.Tensor,
+                        model: Optional[torch.nn.Module] = None,
+                        title: Optional[str] = '<b>Scatter plot</b>') -> go.Figure:
+    """
+    Returns a graph with a regression and scatter of initial distribution.
+
+    .. note::
+        Support 1d x_tensor. If x_tensor n_d method applied t-SNE
+
+    :param x_tensor: training tensor
+    :param y: target tensor. array with true regression values
+    :param model: some model that returns a torch tensor with class 1 probabilities using the call: model(x)
+    :param title: title of plots
+    :return: scatter plot go.Figure and line of regression
+    """
+    flag_tsne = False
+    y_axis = False
+    y = y.flatten()
+
+    if model is not None:
+        y_axis = model(x_tensor.float()).flatten().detach().numpy()
+
+    if len(x_tensor.shape) > 1:
+        if x_tensor.shape[1] > 1:
+            tsne = TSNE(1, init='random', learning_rate=200, random_state=21)
+            x_tensor = torch.tensor(tsne.fit_transform(x_tensor.detach().numpy()))
+            flag_tsne = True
+            print('x_tensor is not 1d. TSNE applied')
+
+    x_tensor = x_tensor.flatten()
+    p_size = 8 if x_tensor.shape[0] < 10 else 6 if x_tensor.shape[0] < 50 else 4
+    dist = go.Scatter(x=x_tensor, y=y, name='initial values', mode='markers', marker={'size': p_size, 'color': COLOR3})
+    data = [dist]
+    if model is not None:
+        x_tensor, indices = torch.sort(x_tensor)
+        y_axis = y_axis[indices]
+        line = go.Scatter(x=x_tensor, y=y_axis, name='predictions', mode='lines', line={'width': 2.5, 'color': COLOR5})
+        data.append(line)
+
+    if flag_tsne:
+        title = f'<b>{title}</b>' + '<b> after t-SNE</b>'
+    else:
+        title = f'<b>{title}</b>'
+
+    fig = go.Figure(data=data)
+    fig.update_layout(**standard_layout)
+    fig.update_layout(title={'text': title, 'font': {'size': 24}})
+
+    return fig
