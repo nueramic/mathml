@@ -1,3 +1,6 @@
+from sklearn.datasets import make_moons
+
+from src.nueramic_mathml.visualize.ml_animation import *
 from src.nueramic_mathml.visualize.multi_animation import *
 from src.nueramic_mathml.visualize.one_animation import *
 
@@ -31,6 +34,24 @@ def make_htmls(type_anim: str = 'gss'):
     elif type_anim == 'optim':
         _, h = gd_optimal(f2, torch.tensor([8, 5]), keep_history=True)
         fig = gen_simple_gradient(f2, h, title='<b>Gradient descent with optimal step</b>')
+
+    elif type_anim == 'rbf':
+        torch.random.manual_seed(7)
+        x, y = make_moons(1000, noise=0.15, random_state=7)
+        x, y = torch.tensor(x), torch.tensor(y)
+
+        model = LogisticRegressionRBF(x[:50])
+        model.fit(x, y, epochs=5000)
+
+        model.metrics_tab(x, y)
+        fig = gen_classification_plot(x, y, model, threshold=0.5, epsilon=0.001,
+                                      title='<b>Logistic Regression with RBF</b>')
+
+    elif type_anim == 'roc_curve':
+        yt = torch.tensor([1, 1, 0, 0, 1, 0])
+        yp = torch.tensor([0.7, 0.6, 0.3, 0.5, 0.4, 0.4])
+        fig = roc_curve_plot(yt, yp)
+
     else:
         return
 
@@ -66,3 +87,5 @@ make_htmls('spi')
 make_htmls('brent')
 make_htmls('bfgs')
 make_htmls('optim')
+make_htmls('rbf')
+make_htmls('roc_curve')
