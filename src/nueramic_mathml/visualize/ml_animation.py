@@ -11,6 +11,7 @@ from sklearn.manifold import TSNE
 from .one_animation import standard_layout, COLOR3, COLOR5
 from ..ml.classification import LogisticRegressionRBF
 from ..ml.metrics import roc_curve_plot
+from ..ml.regression import LinearRegression
 
 
 def gen_classification_plot(x_tensor: torch.Tensor,
@@ -239,7 +240,7 @@ def _make_line_linear(bounds_x: tuple[float, float],
 
 
 def gen_regression_plot(x_tensor: torch.Tensor,
-                        y: torch.Tensor,
+                        y_tensor: torch.Tensor,
                         model: Optional[torch.nn.Module] = None,
                         title: Optional[str] = '<b>Scatter plot</b>') -> go.Figure:
     """
@@ -249,14 +250,23 @@ def gen_regression_plot(x_tensor: torch.Tensor,
         Support 1d x_tensor. If x_tensor n_d method applied t-SNE
 
     :param x_tensor: training tensor
-    :param y: target tensor. array with true regression values
+    :param y_tensor: target tensor. array with true regression values
     :param model: some model that returns a torch tensor with class 1 probabilities using the call: model(x)
     :param title: title of plots
     :return: scatter plot go.Figure and line of regression
+
+    .. code-block:: python3
+
+        >>> from sklearn.datasets import make_regression
+        >>> x, y = make_regression(200, 1, noise=20, random_state=21)
+        >>> x, y = torch.tensor(x), torch.tensor(y)
+        >>> regression = LinearRegression().fit(x, y)
+        >>> gen_regression_plot(x, y, regression)
+
     """
     flag_tsne = False
     y_axis = False
-    y = y.flatten()
+    y_tensor = y_tensor.flatten()
 
     if model is not None:
         y_axis = model(x_tensor.float()).flatten().detach().numpy()
@@ -270,7 +280,7 @@ def gen_regression_plot(x_tensor: torch.Tensor,
 
     x_tensor = x_tensor.flatten()
     p_size = 8 if x_tensor.shape[0] < 10 else 6 if x_tensor.shape[0] < 50 else 4
-    dist = go.Scatter(x=x_tensor, y=y, name='initial values', mode='markers', marker={'size': p_size, 'color': COLOR3})
+    dist = go.Scatter(x=x_tensor, y=y_tensor, name='initial values', mode='markers', marker={'size': p_size, 'color': COLOR3})
     data = [dist]
     if model is not None:
         x_tensor, indices = torch.sort(x_tensor)
