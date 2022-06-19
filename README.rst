@@ -24,16 +24,16 @@
 .. |Colab_1| image:: https://colab.research.google.com/assets/colab-badge.svg
 .. _Colab_1: https://colab.research.google.com/drive/19moQvDMK8kfTDYOGuRwEl06jdf_KXNMW?usp=sharing
 
-..
-    .. raw:: html
 
-       <p align="center">
-       <picture align="center">
-         <source width=150px" media="(prefers-color-scheme: dark)" srcset="docs/_static/nueramic-logo-cropped-white.svg">
-         <source width=150px" media="(prefers-color-scheme: light)" srcset="docs/_static/nueramic-logo-cropped-black.svg">
-         <img alt="two logos" src="docs/_static/nueramic-logo-cropped-black.svg">
-       </picture>
-       </p>
+.. raw:: html
+
+   <p align="center">
+   <picture align="center">
+     <source width=150px" media="(prefers-color-scheme: dark)" srcset="docs/_static/nueramic-logo-cropped-white.svg">
+     <source width=150px" media="(prefers-color-scheme: light)" srcset="docs/_static/nueramic-logo-cropped-black.svg">
+     <img alt="two logos" src="docs/_static/nueramic-logo-cropped-black.svg">
+   </picture>
+   </p>
 
 
 Nueramic MathML

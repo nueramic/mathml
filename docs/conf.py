@@ -76,3 +76,8 @@ latex_use_xindy = False
 
 # -- GraphViz configuration ----------------------------------
 graphviz_output_format = 'svg'
+
+html_js_files = [
+    "require.min.js",  # Add to your _static
+    "custom.js",
+]

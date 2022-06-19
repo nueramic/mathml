@@ -4,6 +4,7 @@ import torch
 from src.nueramic_mathml.ml.metrics import binary_classification_report, precision, recall, accuracy, auc_roc, f_score, \
     r2_score
 
+
 binary_classification_report_tests = [
     (
         torch.tensor([1, 0, 1, 1]),  # true
@@ -38,6 +39,7 @@ def test_bin_cr(y_true, y_pred, y_prob, expected):
 
 
 precision_tests = [
+
     (torch.tensor([1, 0, 1, 1]), torch.tensor([1, 0, 0, 1]), 2 / 3, 1, 3 / 4),  # basic test
     (torch.tensor([1, 0, 1, 1]), torch.tensor([1, 1, 1, 1]), 1, 3 / 4, 3 / 4),
     (torch.tensor([1, 0, 1, 1]), torch.tensor([1, 0, 0, 0]), 1 / 3, 1, 1 / 2),
@@ -53,6 +55,7 @@ def test_precision(y_true, y_pred, expected_recall, expected_precision, expected
 
 @pytest.mark.parametrize('y_true, y_pred, expected_recall, expected_precision, expected_accuracy', precision_tests)
 def test_recall(y_true, y_pred, expected_recall, expected_precision, expected_accuracy):
+
     assert recall(y_true, y_pred) == pytest.approx(expected_recall, rel=1e-5)
 
 

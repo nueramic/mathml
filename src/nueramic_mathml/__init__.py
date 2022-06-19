@@ -1,10 +1,11 @@
-from .calculus import *
-from .one_optimize import *
-from .support import *
-from .multi_optimize import *
-from .ml.optimize import *
-from .ml.classification import *
+from .calculus import hessian, jacobian, gradient
 from .ml import metrics
+from .ml.classification import *
+from .ml.optimize import *
+from .multi_optimize import gd_optimal, gd_frac, gd_constant, nonlinear_cgm, bfgs, primal_dual_interior, \
+    log_barrier_solver, constrained_lagrangian_solver
+from .one_optimize import golden_section_search, successive_parabolic_interpolation, brent
+from .support import HiddenPrints
 
 __all__ = [
     "hessian",
@@ -26,4 +27,4 @@ __all__ = [
     "metrics"
 ]
 
-__version__ = '1.0 dev 20'
+__version__ = '1.0 dev 2001 ))) Hi'

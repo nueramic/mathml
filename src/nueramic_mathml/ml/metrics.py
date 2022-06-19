@@ -167,6 +167,7 @@ def roc_curve(y_true: torch.Tensor, y_prob: torch.Tensor, n_thresholds: Union[in
     check_tensors(y_true, y_prob)
 
     thresholds, _ = torch.sort(torch.unique(y_prob), descending=True)
+    thresholds = torch.cat((torch.ones(1), thresholds, torch.zeros(1)))
 
     if n_thresholds is not None:
         thresholds = thresholds[torch.linspace(0, len(thresholds) - 1, n_thresholds, dtype=torch.long)]
@@ -191,8 +192,8 @@ def auc_roc(y_true: torch.Tensor, y_prob: torch.Tensor, n_thresholds: int = 500)
 
     tpr_array, fpr_array = roc_curve(y_true, y_prob, min(y_true.shape[0], n_thresholds)).values()
     auc = 0
-    for i in range(len(fpr_array) - 1):  # Integrating by Trapezoidal rule
-        auc += (tpr_array[i] + tpr_array[i + 1]) * (fpr_array[i + 1] - fpr_array[i]) / 2
+    for i in range(len(fpr_array) - 1):  # Integrating
+        auc += tpr_array[i + 1] * (fpr_array[i + 1] - fpr_array[i])
     return float(auc)
 
 
@@ -254,6 +255,6 @@ def roc_curve_plot(y_true: torch.Tensor, y_prob: torch.Tensor, fill: bool = Fals
         fig = px.line(roc_curve(y_true, y_prob, None if len(y_true) < 1000 else 1000), x='FPR', y='TPR',
                       title='<b>ROC curve</b>')
 
-    fig.update_layout(font={'size': 18}, autosize=False, width=700, height=600)
-    fig.add_scatter(x=[0, 1], y=[0, 1], mode='lines', line={'dash': 'dash'}, showlegend=False)
+    fig.update_layout(font={'size': 18}, autosize=False, width=700, height=600, xaxis={'range': [-0.05, 1.05]})
+    fig.add_scatter(x=[0, 1], y=[0, 1], mode='lines', line={'dash': 'dash'}, name='', showlegend=False)
     return fig
