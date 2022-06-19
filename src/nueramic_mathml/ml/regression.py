@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 from itertools import combinations_with_replacement
 from typing import Callable
+from .metrics import regression_report
 
 import numpy as np
 import torch
@@ -68,9 +69,10 @@ class BaseRegressionModel(torch.nn.Module):
             \\hat Y_{n \\times 1} = X_{\\operatorname{transformed}} \\cdot W
 
         :param x: input observations, tensor n x m (n is the number of observations that have m parameters)
-        :param transformed: flag of transformed x
+        :param transformed: the flag of the converted x. if true, x will not be converted
         :return: regression value
         """
+        x = x.float()
 
         if self.w is None:
             self.init_weights(x)
@@ -81,6 +83,17 @@ class BaseRegressionModel(torch.nn.Module):
         return self.w(x)
 
     _forward = forward
+
+    def metrics_tab(self, x: torch.Tensor, y: torch.Tensor) -> dict:
+        """
+        Returns metrics dict with r2, mae, mse, mape
+
+        :param x: training set
+        :param y: target value of regression
+        :return: r2, mae, mse, mape
+        """
+        y_pred: torch.Tensor = self(x)
+        return regression_report(y, y_pred)
 
     def init_weights(self, x: torch.Tensor) -> None:
         """
@@ -174,7 +187,13 @@ class BaseRegressionModel(torch.nn.Module):
         for epoch in range(1, epochs + 1):
             optimizer.zero_grad()
             output = criterion(self._forward(x).flatten(), y.flatten())
+
+            if torch.isnan(output):
+                print('WARNING. Values may be too large and loss is nan')
+                return self
+
             if output.item() < self._best_loss:
+
                 self._best_state = self.state_dict()
 
             if l1_constant > 0:
