@@ -64,9 +64,9 @@ def make_htmls(type_anim: str = 'gss'):
                                       title='<b>Logistic Regression with RBF</b>')
         try:
             fig = fig.update_layout(light_settings)
-            fig.write_image(f'./_static/charts/{type_anim.upper()}-animation-light.svg')
+            fig.write_image(f'./_static/charts/{type_anim.upper()}-animation-light.svg', width=1600, height=800)
             fig = fig.update_layout(dark_settings)
-            fig.write_image(f'./_static/charts/{type_anim.upper()}-animation-dark.svg')
+            fig.write_image(f'./_static/charts/{type_anim.upper()}-animation-dark.svg', width=1600, height=800)
 
         except ValueError:
             pass
