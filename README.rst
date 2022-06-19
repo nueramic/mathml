@@ -86,6 +86,8 @@ You can use our models for classification and regression
     x, y = torch.tensor(x), torch.tensor(y)
     logistic_model_rbf = LogisticRegressionRBF(x[:1000]).fit(x, y, show_epoch=10)
 
+.. code-block:: python
+
     Epoch:     1 | CrossEntropyLoss:  0.71496
     Epoch:    12 | CrossEntropyLoss:  0.35328
     Epoch:    23 | CrossEntropyLoss:  0.27769
@@ -96,8 +98,12 @@ You can use our models for classification and regression
     Epoch:    78 | CrossEntropyLoss:  0.13051
     Epoch:    89 | CrossEntropyLoss:  0.11724
     Epoch:   100 | CrossEntropyLoss:  0.10629
-
+    
+.. code-block:: python
+ 
     logistic_model_rbf.metrics_tab(x, y)
+    
+.. code-block:: python
 
     {'auc_roc': 0.9974513817072977,
      'f1': 0.9700730618209839,
@@ -109,12 +115,17 @@ Visualizations
 You can create beautiful animations of optimization algorithms and
 regression/classification models.
 
+.. code-block:: python
+   
+   gen_classification_plot(x, y, model, threshold=0.5, epsilon=0.001)
+
+
 .. raw:: html
 
        <p align="center">
        <picture align="center">
-         <source width=800px" media="(prefers-color-scheme: dark)" srcset="docs/_static/charts/RBF-animation-light.svg">
-         <source width=800px" media="(prefers-color-scheme: light)" srcset="docs/_static/charts/RBF-animation-dark.svg">
+         <source width=800px" media="(prefers-color-scheme: dark)" srcset="docs/_static/charts/RBF-animation-dark.svg">
+         <source width=800px" media="(prefers-color-scheme: light)" srcset="docs/_static/charts/RBF-animation-light.svg">
          <img alt="rbf" src="docs/_static/nueramic-logo-cropped-black.svg">
        </picture>
        </p>
