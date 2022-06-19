@@ -26,7 +26,7 @@ class BaseClassification(torch.nn.Module):
         :param x: training set
         :param y: target value
         :param: dict with recall, precision, accuracy, f1, auc roc scores
-        :return:
+        :return: dict with 5 metrics
         """
         y_prob: torch.Tensor = self.forward(x)
         try:
