@@ -92,6 +92,7 @@ def bfgs(function: Callable[[torch.Tensor], torch.Tensor],
     h_k = torch.eye(x_k.shape[0], dtype=torch.float64) * tolerance ** 0.1
     grad_k = grad_k.reshape(-1, 1)
     x_k = x_k.reshape(-1, 1)
+    s_k = x_k + 1
 
     # first verbose
     print_verbose(x_k, func_k, verbose, 0, round_precision)
@@ -99,7 +100,7 @@ def bfgs(function: Callable[[torch.Tensor], torch.Tensor],
     try:
         for i in range(max_iter):
             # stop criterion
-            if grad_k.norm(2) < tolerance:
+            if grad_k.norm(2) < tolerance or s_k.norm(2) < tolerance:
                 history['message'] = 'Searching finished. Successfully. code 0'
                 return x_k.reshape(-1), history
 
@@ -208,7 +209,7 @@ def gd_constant(function: Callable[[torch.Tensor], torch.Tensor],
     try:
         for i in range(max_iter - 1):
 
-            if torch.sum(grad_k ** 2) ** 0.5 < epsilon:  # comparing of norm 2 with optimization accuracy
+            if grad_k.norm(2) < epsilon:  # comparing of norm 2 with optimization accuracy
                 history['message'] = 'Optimization terminated successfully. code 0'
                 break
             else:
@@ -296,7 +297,7 @@ def gd_frac(function: Callable[[torch.Tensor], torch.Tensor],
             grad_k = gradient(function, x_k)
 
             #  comparing of norm 2 with optimization accuracy
-            if torch.sum(grad_k ** 2) ** 0.5 < epsilon:
+            if grad_k.norm(2) < epsilon:
                 history['message'] = 'Optimization terminated successfully. code 0'
                 break
 
@@ -358,7 +359,7 @@ def gd_optimal(function: Callable[[torch.Tensor], torch.Tensor],
         for i in range(max_iter - 1):
 
             # comparing of norm 2 with optimization accuracy
-            if (grad_k ** 2).sum() ** 0.5 < float(epsilon):
+            if grad_k.norm(2) < epsilon:
                 history['message'] = 'Optimization terminated successfully. code 0'
                 break
 
@@ -436,7 +437,7 @@ def nonlinear_cgm(function: Callable[[torch.Tensor], torch.Tensor],
     try:
         for i in range(max_iter - 1):
 
-            if (grad_k ** 2).sum() ** 0.5 < epsilon:
+            if grad_k.norm(2) < epsilon:
                 history['message'] = 'Optimization terminated successfully. code 0'
                 break
             else:
@@ -458,7 +459,7 @@ def nonlinear_cgm(function: Callable[[torch.Tensor], torch.Tensor],
 
                 # history
                 if keep_history:
-                    history = update_history_gd(history, values=[i + 1, func_k, (grad_k ** 2).sum() ** 0.5, x_k])
+                    history = update_history_gd(history, values=[i + 1, func_k, grad_k.norm(2), x_k])
 
         else:
             history['message'] = 'Optimization terminated. Max steps. code 1'
