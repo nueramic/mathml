@@ -103,3 +103,18 @@ You can use our models for classification and regression
      'f1': 0.9700730618209839,
      'precision': 0.9709476828575134,
      'recall': 0.9692000150680542}
+
+Visualizations
+---------------
+You can create beautiful animations of optimization algorithms and
+regression/classification models.
+
+.. raw:: html
+
+       <p align="center">
+       <picture align="center">
+         <source width=150px" media="(prefers-color-scheme: dark)" srcset="docs/_static/charts/RBF-animation-light.html">
+         <source width=150px" media="(prefers-color-scheme: light)" srcset="docs/_static/charts/RBF-animation-dark.html">
+         <img alt="rbf" src="docs/_static/nueramic-logo-cropped-black.svg">
+       </picture>
+       </p>
