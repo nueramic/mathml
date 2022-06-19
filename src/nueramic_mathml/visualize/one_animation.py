@@ -20,6 +20,13 @@ COLOR3 = BLUE_RYB = '#0a50ff'
 COLOR4 = GRAY_WEB = '#7F8082'
 COLOR5 = EMERALD = '#50C878'
 
+standard_layout = dict(
+    xaxis_title=r'<b>x</b>',
+    yaxis_title=r'<b>f(x)</b>',
+    font=dict(size=14),
+    legend_title_text='<b>variable names</b>'
+)
+
 
 def transfer_history_gss(history: HistoryGSS, func) -> pd.DataFrame:
     """
@@ -114,12 +121,7 @@ def gen_animation_gss(func: Callable,
 
     fig.add_trace(go.Scatter(x=x_axis, y=f_axis, name='function'))
 
-    fig.update_layout(
-        xaxis_title=r'<b>x</b>',
-        yaxis_title=r'<b>f(x)</b>',
-        font=dict(size=14),
-        legend_title_text='<b>variable names</b>'
-    )
+    fig.update_layout(**standard_layout)
 
     return fig
 
@@ -232,6 +234,7 @@ def gen_animation_spi(func: Callable[[float], float],
     fig = go.Figure(data=data, layout=layout, frames=frames)
     fig.update_xaxes(range=x_range)
     fig.update_yaxes(range=f_range)
+    fig.update_layout(**standard_layout)
 
     return fig
 
