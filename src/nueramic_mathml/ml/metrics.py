@@ -247,6 +247,13 @@ def roc_curve_plot(y_true: torch.Tensor, y_prob: torch.Tensor, fill: bool = Fals
     :param y_prob: array of probabilities of confidence of belonging to the 1st class
     :param fill: flag for filling the area under the curve
     :return: go.Figure
+
+    .. code-block:: python3
+
+        >>> yt = torch.tensor([1, 1, 0, 0, 1, 0])
+        >>> yp = torch.tensor([0.7, 0.6, 0.3, 0.5, 0.4, 0.4])
+        >>> roc_curve_plot(yt, yp)
+
     """
     if fill:
         fig = px.area(roc_curve(y_true, y_prob, None if len(y_true) < 1000 else 1000), x='FPR', y='TPR',
