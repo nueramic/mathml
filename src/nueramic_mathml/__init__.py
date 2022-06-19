@@ -31,4 +31,4 @@ __all__ = [
     "one_optimize"
 ]
 
-__version__ = '1.0 dev 2048 ))) Hi'
+__version__ = '0.75 beta'
