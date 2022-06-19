@@ -6,6 +6,22 @@ from src.nueramic_mathml.visualize.one_animation import *
 
 color_light = '#F4F4F4'
 color_dark = '#212121'
+light_settings = {
+    'paper_bgcolor': 'rgba(0,0,0,0)',
+    'plot_bgcolor': 'rgba(0,0,0,0)',
+    'xaxis': {'color': 'black', 'gridcolor': color_light, 'zerolinecolor': color_light},
+    'yaxis': {'color': 'black', 'gridcolor': color_light, 'zerolinecolor': color_light},
+    'title': {'font': {'color': 'black'}},
+    'legend': {'font': {'color': 'black'}},
+}
+dark_settings = {
+    'paper_bgcolor': 'rgba(0,0,0,0)',
+    'plot_bgcolor': 'rgba(0,0,0,0)',
+    'xaxis': {'color': 'white', 'gridcolor': color_dark, 'zerolinecolor': color_dark},
+    'yaxis': {'color': 'white', 'gridcolor': color_dark, 'zerolinecolor': color_dark},
+    'title': {'font': {'color': 'white'}},
+    'legend': {'font': {'color': 'white'}},
+}
 
 
 def f(x): return x ** 3 - x ** 2 - x
@@ -46,6 +62,14 @@ def make_htmls(type_anim: str = 'gss'):
         model.metrics_tab(x, y)
         fig = gen_classification_plot(x, y, model, threshold=0.5, epsilon=0.001,
                                       title='<b>Logistic Regression with RBF</b>')
+        try:
+            fig = fig.update_layout(light_settings)
+            fig.write_image(f'./_static/charts/{type_anim.upper()}-animation-light.svg')
+            fig = fig.update_layout(dark_settings)
+            fig.write_image(f'./_static/charts/{type_anim.upper()}-animation-dark.svg')
+
+        except ValueError:
+            pass
 
     elif type_anim == 'roc_curve':
         yt = torch.tensor([1, 1, 0, 0, 1, 0])
@@ -68,29 +92,11 @@ def make_htmls(type_anim: str = 'gss'):
     else:
         return
 
-    fig = fig.update_layout(
-        {
-            'paper_bgcolor': 'rgba(0,0,0,0)',
-            'plot_bgcolor': 'rgba(0,0,0,0)',
-            'xaxis': {'color': 'black', 'gridcolor': color_light, 'zerolinecolor': color_light},
-            'yaxis': {'color': 'black', 'gridcolor': color_light, 'zerolinecolor': color_light},
-            'title': {'font': {'color': 'black'}},
-            'legend': {'font': {'color': 'black'}},
-        }
-    )
+    fig = fig.update_layout(light_settings)
 
     fig.write_html(f'./_static/charts/{type_anim.upper()}-animation-light.html')
 
-    fig = fig.update_layout(
-        {
-            'paper_bgcolor': 'rgba(0,0,0,0)',
-            'plot_bgcolor': 'rgba(0,0,0,0)',
-            'xaxis': {'color': 'white', 'gridcolor': color_dark, 'zerolinecolor': color_dark},
-            'yaxis': {'color': 'white', 'gridcolor': color_dark, 'zerolinecolor': color_dark},
-            'title': {'font': {'color': 'white'}},
-            'legend': {'font': {'color': 'white'}},
-        }
-    )
+    fig = fig.update_layout(dark_settings)
 
     fig.write_html(f'./_static/charts/{type_anim.upper()}-animation-dark.html')
 
