@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Callable, Tuple, Sequence
 
 import numpy
+import pandas as pd
 import torch
 
 from .calculus import gradient, hessian, jacobian
@@ -865,3 +866,97 @@ def constrained_lagrangian_solver(function: Callable[[float | torch.Tensor], tor
             omega = 1 / mu_k
 
     return x_k, history
+
+
+def branch_bound(function: Callable[[float | torch.Tensor], torch.Tensor],
+                 x0: torch.Tensor,
+                 eq_constraints: Sequence[Callable[[float | torch.Tensor], torch.Tensor]] | None = None,
+                 ineq_constraints: Sequence[Callable[[float | torch.Tensor], torch.Tensor]] | None = None,
+                 tol: float = 1e-6,
+                 return_dataframe_history: bool = False
+                 ) -> Tuple[torch.Tensor | None, dict | pd.DataFrame]:
+    """
+    Returns :math:`x \\in \\mathbf{Z}^{n}`, which minimizes the function.
+
+    :param function: target function. depends on torch tensor
+    :param x0: argmin function. :math:`x0 \\in \\mathbf{R}^{n}`. torch tensor
+    :param eq_constraints: equality constraints for function [g(x), ...] = 0
+    :param ineq_constraints: inequality constraint for function: [h(x), ...] >= 0
+    :param tol: tolerance for eq_constraint: if |eq(x)| <= tol than eq satisfied
+    :param return_dataframe_history: return history as pandas dataframe
+    :return: returns integer solution of minimization and history. If constraint is not satisfied return None.
+
+    .. code-block:: python3
+
+        >>> def f(x): return ((x - torch.cos(x) - 1) ** 2).sum()
+        >>> x_0 = torch.tensor([4., 5.])
+
+        >>> x_opt = gd_optimal(f, x0)[0]
+        >>> x_int, hist = branch_bound(f, x_opt, return_dataframe_history=True)
+        >>> print(x_int)
+
+        >>> hist
+
+        +---+-------------+-----------+---------------------------+
+        |   | x           | func      | message                   |
+        +===+=============+===========+===========================+
+        | 0 | (1.0, 1.0)  | 0.583853  | constraints is satisfied  |
+        +---+-------------+-----------+---------------------------+
+        | 1 | (1.0, 2.0)  | 2.297398  | constraints is satisfied  |
+        +---+-------------+-----------+---------------------------+
+        | 2 | (2.0, 1.0)  | 2.297398  | constraints is satisfied  |
+        +---+-------------+-----------+---------------------------+
+        | 3 | (2.0, 2.0)  | 4.010944  | constraints is satisfied  |
+        +---+-------------+-----------+---------------------------+
+    """
+    history = {'x': [], 'func': [], 'message': []}
+    min_f = torch.inf
+    min_x = x0.clone()
+
+    def check_constraints(_x: torch.Tensor) -> [bool, str]:
+        """ Check constraints """
+        flag_satisfaction = True
+        message = 'constraints is satisfied'
+        _x = _x.float()
+
+        try:
+            function(_x)
+
+            if eq_constraints is not None:
+                for ind, eq in enumerate(eq_constraints):
+                    assert abs(eq(_x)) <= tol, f'{ind} equation is not satisfied'
+
+            if ineq_constraints is not None:
+                for ind, ineq in enumerate(ineq_constraints):
+                    assert ineq(_x) >= 0 - tol, f'{ind} inequality is not satisfied'
+
+        except Exception as e:
+            flag_satisfaction = False
+            message = f'constraint is not satisfied: {e}'
+
+        return flag_satisfaction, message
+
+    n = x0.flatten().shape[0]  # amount of variables
+
+    for i in range(2 ** n):
+        x_rounded = x0.clone()
+        round_rules = f'{i:0{n}b}'  # Number at binary format with n symbols
+        for j, rule in enumerate(round_rules):
+            x_rounded[j] = torch.floor(x_rounded[j]) if rule == '0' else torch.ceil(x_rounded[j])
+
+        flag, mess = check_constraints(x_rounded)
+        func = function(x_rounded)
+        if func < min_f:
+            min_f = func
+            min_x = x_rounded
+
+        history['x'].append(x_rounded)
+        history['func'].append(func)
+        history['message'].append(mess)
+
+    if return_dataframe_history:
+        history['x'] = list(map(lambda x: tuple(list(x.numpy())), history['x']))
+        history['func'] = list(map(lambda x: float(x), history['func']))
+        history = pd.DataFrame(history)
+
+    return min_x, history

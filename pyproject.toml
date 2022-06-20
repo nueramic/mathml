@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nueramic_mathml"
-version = "0.75"
+version = "0.75.2"
 description = "Math algorithms in ML on torch"
 authors = [
     "Victor Barbarich <vktrbr@icloud.com>",
